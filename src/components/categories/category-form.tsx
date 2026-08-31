@@ -8,16 +8,29 @@ import { useState } from 'react';
 
 interface CategoryFormProps {
   onClose: () => void;
+  onSubmit: (data: { name: string; color: string }) => Promise<void>;
 }
 
 /**
  * Category Form Modal
  * Create or edit a category
  */
-export function CategoryForm({ onClose }: CategoryFormProps) {
+export function CategoryForm({ onClose, onSubmit }: CategoryFormProps) {
   const t = useTranslations('Categories.Form');
   const [name, setName] = useState('');
   const [color, setColor] = useState('#3b82f6');
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const handleSubmit = async () => {
+    if (!name.trim()) return;
+    setIsSubmitting(true);
+    try {
+      await onSubmit({ name, color });
+      onClose();
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
 
   return (
     <Dialog open onOpenChange={onClose}>
@@ -35,6 +48,7 @@ export function CategoryForm({ onClose }: CategoryFormProps) {
               value={name} 
               onChange={(e) => setName(e.target.value)} 
               placeholder={t('namePlaceholder')} 
+              autoFocus
             />
           </div>
           <div className="flex flex-col gap-2">
@@ -58,8 +72,10 @@ export function CategoryForm({ onClose }: CategoryFormProps) {
           </div>
         </div>
         <DialogFooter>
-          <Button variant="outline" onClick={onClose}>{t('cancel')}</Button>
-          <Button onClick={onClose}>{t('save')}</Button>
+          <Button variant="outline" onClick={onClose} disabled={isSubmitting}>{t('cancel')}</Button>
+          <Button onClick={handleSubmit} disabled={!name.trim() || isSubmitting}>
+            {isSubmitting ? '저장 중...' : t('save')}
+          </Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>

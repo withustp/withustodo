@@ -42,17 +42,24 @@ export function PomodoroTimer() {
     }
   };
 
+  const { tasks } = useTasks();
+  const [selectedTaskId, setSelectedTaskId] = useState<string>('none');
+  const incompleteTasks = tasks.filter(t => t.status !== 'done');
+
   return (
     <div className="flex flex-col items-center w-full">
       <div className="mb-8 w-full max-w-xs">
-        <Select>
+        <Select value={selectedTaskId} onValueChange={setSelectedTaskId}>
           <SelectTrigger>
             <SelectValue placeholder={t('selectTask')} />
           </SelectTrigger>
           <SelectContent>
             <SelectItem value="none">{t('noTask')}</SelectItem>
-            <SelectItem value="1">Finish Q3 Report</SelectItem>
-            <SelectItem value="2">Read book</SelectItem>
+            {incompleteTasks.map((task) => (
+              <SelectItem key={task.id} value={task.id}>
+                {task.title}
+              </SelectItem>
+            ))}
           </SelectContent>
         </Select>
       </div>

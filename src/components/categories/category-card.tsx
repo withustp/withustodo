@@ -3,8 +3,9 @@
 import { useTranslations } from 'next-intl';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Edit2, Trash2, Briefcase, User, BookOpen } from 'lucide-react';
+import { Trash2, Briefcase, User, BookOpen, Tag } from 'lucide-react';
 import { motion } from 'framer-motion';
+import { Category } from '@/types';
 
 const iconMap: Record<string, any> = {
   Briefcase,
@@ -13,22 +14,17 @@ const iconMap: Record<string, any> = {
 };
 
 interface CategoryCardProps {
-  category: {
-    id: string;
-    name: string;
-    color: string;
-    icon: string;
-    taskCount: number;
-  };
+  category: Category;
+  onDelete?: (id: string) => void;
 }
 
 /**
  * Category Card
  * Displays a single category with edit/delete actions
  */
-export function CategoryCard({ category }: CategoryCardProps) {
+export function CategoryCard({ category, onDelete }: CategoryCardProps) {
   const t = useTranslations('Categories.Card');
-  const Icon = iconMap[category.icon] || Briefcase;
+  const Icon = (category.icon && iconMap[category.icon]) ? iconMap[category.icon] : Tag;
 
   return (
     <motion.div whileHover={{ scale: 1.02 }} transition={{ duration: 0.2 }}>
@@ -44,16 +40,20 @@ export function CategoryCard({ category }: CategoryCardProps) {
             </div>
             <div>
               <h3 className="font-semibold text-lg">{category.name}</h3>
-              <p className="text-sm text-muted-foreground">{category.taskCount} {t('tasks')}</p>
+              <p className="text-sm text-muted-foreground">{category.task_count || 0} {t('tasks')}</p>
             </div>
           </div>
           <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-            <Button variant="ghost" size="icon" className="h-8 w-8">
-              <Edit2 size={14} />
-            </Button>
-            <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive hover:text-destructive">
-              <Trash2 size={14} />
-            </Button>
+            {onDelete && (
+              <Button 
+                variant="ghost" 
+                size="icon" 
+                className="h-8 w-8 text-destructive hover:text-destructive"
+                onClick={() => onDelete(category.id)}
+              >
+                <Trash2 size={14} />
+              </Button>
+            )}
           </div>
         </div>
       </Card>

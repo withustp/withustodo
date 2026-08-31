@@ -28,7 +28,6 @@ export function TaskCreateModal() {
         title,
         status: 'todo',
         priority: 'none',
-        user_id: 'TEMP_USER_ID', // In real app, get from auth context
       });
       setTitle('');
       closeCreateModal();

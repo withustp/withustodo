@@ -3,25 +3,34 @@
 import { useTranslations } from 'next-intl';
 import { Card } from '@/components/ui/card';
 import { CheckCircle2, Clock, AlertCircle } from 'lucide-react';
-import { cn } from '@/lib/utils';
-import { useEffect, useState } from 'react';
-import { createClient } from '@/lib/supabase/client';
+import { useTasks } from '@/hooks/use-tasks';
 
 /**
  * Today Summary Widget
- * Shows pending, completed, and overdue tasks.
+ * Dynamically computes pending, completed, and overdue tasks from real state.
  */
 export function TodaySummary() {
   const t = useTranslations('Dashboard.TodaySummary');
-  const [stats, setStats] = useState({ pending: 0, completed: 0, overdue: 0 });
+  const { tasks } = useTasks();
 
-  useEffect(() => {
-    // In a real app, fetch these from Supabase based on current date
-    setStats({ pending: 5, completed: 3, overdue: 1 });
-  }, []);
+  const now = new Date();
+  let pending = 0;
+  let completed = 0;
+  let overdue = 0;
 
-  const total = stats.pending + stats.completed + stats.overdue;
-  const progress = total > 0 ? (stats.completed / total) * 100 : 0;
+  tasks.forEach((task) => {
+    if (task.status === 'done') {
+      completed++;
+    } else {
+      pending++;
+      if (task.due_date && new Date(task.due_date) < now) {
+        overdue++;
+      }
+    }
+  });
+
+  const total = pending + completed;
+  const progress = total > 0 ? (completed / total) * 100 : 0;
 
   return (
     <Card className="p-6 h-full flex flex-col justify-between bg-white/5 dark:bg-white/5 backdrop-blur-xl border border-white/10">
@@ -35,7 +44,7 @@ export function TodaySummary() {
             <Clock size={16} />
             <span className="text-sm font-medium">{t('pending')}</span>
           </div>
-          <span className="text-3xl font-bold">{stats.pending}</span>
+          <span className="text-3xl font-bold">{pending}</span>
         </div>
         
         <div className="flex flex-col gap-2">
@@ -43,7 +52,7 @@ export function TodaySummary() {
             <CheckCircle2 size={16} />
             <span className="text-sm font-medium">{t('completed')}</span>
           </div>
-          <span className="text-3xl font-bold">{stats.completed}</span>
+          <span className="text-3xl font-bold">{completed}</span>
         </div>
 
         <div className="flex flex-col gap-2">
@@ -51,7 +60,7 @@ export function TodaySummary() {
             <AlertCircle size={16} />
             <span className="text-sm font-medium">{t('overdue')}</span>
           </div>
-          <span className="text-3xl font-bold">{stats.overdue}</span>
+          <span className="text-3xl font-bold">{overdue}</span>
         </div>
       </div>
 

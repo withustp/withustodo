@@ -19,7 +19,7 @@ export function Header() {
   const [mounted, setMounted] = useState(false);
   const router = useRouter();
   
-  const { openCommandPalette, isNotificationCenterOpen, toggleNotificationCenter } = useUIStore();
+  const { openCommandPalette, isNotificationCenterOpen, toggleNotificationCenter, toggleSidebar } = useUIStore();
   const { openCreateModal } = useTaskStore();
 
   useEffect(() => {
@@ -38,7 +38,10 @@ export function Header() {
   return (
     <header className="sticky top-0 z-30 flex h-14 items-center justify-between border-b border-border bg-background/80 px-4 backdrop-blur-xl lg:px-8">
       <div className="flex items-center gap-4">
-        <button className="flex h-9 w-9 items-center justify-center rounded-md border border-border bg-background hover:bg-muted lg:hidden">
+        <button 
+          onClick={toggleSidebar}
+          className="flex h-9 w-9 items-center justify-center rounded-md border border-border bg-background hover:bg-muted lg:hidden"
+        >
           <Menu className="h-5 w-5" />
           <span className="sr-only">Toggle Menu</span>
         </button>

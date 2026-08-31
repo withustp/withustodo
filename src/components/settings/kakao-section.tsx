@@ -6,6 +6,8 @@ import { Button } from '@/components/ui/button';
 import { MessageCircle } from 'lucide-react';
 import { useState } from 'react';
 
+import { toast } from 'sonner';
+
 export function KakaoSection() {
   const t = useTranslations('Settings.Kakao');
   const [isSending, setIsSending] = useState(false);
@@ -15,12 +17,12 @@ export function KakaoSection() {
     try {
       const res = await fetch('/api/kakao/send-message', { method: 'POST' });
       if (res.ok) {
-        alert(t('testSuccess'));
+        toast.success(t('testSuccess'));
       } else {
-        alert(t('testFailed'));
+        toast.error(t('testFailed'));
       }
-    } catch (e) {
-      alert(t('testFailed'));
+    } catch {
+      toast.error(t('testFailed'));
     }
     setIsSending(false);
   };

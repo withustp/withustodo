@@ -54,7 +54,20 @@ export function useTasks(filter?: TaskFilter) {
 
   const createTask = async (task: Partial<Task>) => {
     try {
-      const { data, error } = await supabase.from('tasks').insert([{ ...task, is_deleted: false }]).select('*, category:categories(*)').single();
+      let userId = task.user_id;
+      if (!userId || userId === 'TEMP_USER_ID') {
+        const { data: { user } } = await supabase.auth.getUser();
+        if (user) {
+          userId = user.id;
+        }
+      }
+
+      const { data, error } = await supabase
+        .from('tasks')
+        .insert([{ ...task, user_id: userId, is_deleted: false }])
+        .select('*, category:categories(*)')
+        .single();
+
       if (error) throw error;
       addTask(data as any);
       return data;
