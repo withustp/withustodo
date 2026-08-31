@@ -43,13 +43,14 @@ export function Sidebar() {
       )}
     >
       <div className="flex h-14 items-center px-4 py-4">
-        <Link href="/dashboard" className="flex items-center gap-2 overflow-hidden">
-          <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-primary text-primary-foreground">
-            <CheckCircle className="h-5 w-5" />
+        <Link href="/dashboard" className="flex items-center gap-2.5 overflow-hidden">
+          <div className="relative flex h-9 w-9 shrink-0 items-center justify-center rounded-xl overflow-hidden shadow-md">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src="/logo.png" alt="WithUs Todo" className="h-full w-full object-cover" />
           </div>
           <span
             className={cn(
-              'font-semibold text-lg whitespace-nowrap transition-opacity duration-300',
+              'font-bold text-lg tracking-tight whitespace-nowrap transition-opacity duration-300 bg-gradient-to-r from-cyan-400 to-indigo-400 bg-clip-text text-transparent',
               isSidebarCollapsed ? 'opacity-0 w-0 hidden' : 'opacity-100 w-auto'
             )}
           >

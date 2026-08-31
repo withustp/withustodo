@@ -43,12 +43,13 @@ export default function LoginPage() {
         className="w-full max-w-md space-y-8 rounded-2xl bg-white/5 dark:bg-white/5 backdrop-blur-xl border border-white/10 p-8 shadow-2xl relative z-10"
       >
         <div className="flex flex-col items-center space-y-4 text-center">
-          <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-primary text-primary-foreground shadow-lg">
-            <CheckCircle className="h-7 w-7" />
+          <div className="relative flex h-20 w-20 items-center justify-center rounded-2xl overflow-hidden shadow-2xl ring-2 ring-primary/20">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src="/logo.png" alt="WithUs Todo Logo" className="h-full w-full object-cover" />
           </div>
           <div className="space-y-2">
-            <h1 className="text-3xl font-bold tracking-tight text-foreground">
-              {t('welcome')}
+            <h1 className="text-3xl font-bold tracking-tight text-foreground bg-gradient-to-r from-cyan-400 via-indigo-300 to-purple-400 bg-clip-text text-transparent">
+              WithUs Todo
             </h1>
             <p className="text-sm text-muted-foreground">
               {t('subtitle')}
