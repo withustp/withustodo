@@ -54,11 +54,23 @@
     "todo": "To Do",
     "inProgress": "In Progress",
     "done": "Done",
+    "status": {
+      "todo": "To Do",
+      "in_progress": "In Progress",
+      "done": "Done"
+    },
     "priority": "Priority",
     "high": "High",
     "medium": "Medium",
     "low": "Low",
     "none": "None",
+    "table": {
+      "title": "Title",
+      "status": "Status",
+      "priority": "Priority",
+      "category": "Category",
+      "dueDate": "Due Date"
+    },
     "dueDate": "Due Date",
     "reminder": "Reminder",
     "category": "Category",
@@ -72,11 +84,17 @@
     "filters": "Filters",
     "clearFilters": "Clear Filters",
     "bulkActions": "Bulk Actions",
+    "selectedCount": "{count} tasks selected",
+    "markDone": "Mark Done",
+    "detailTitle": "Task Details",
+    "taskTitlePlaceholder": "Task title",
+    "addDescription": "Add description...",
     "selectAll": "Select All",
     "deleteSelected": "Delete Selected",
     "moveCategory": "Move Category",
     "changePriority": "Change Priority",
-    "search": "Search tasks"
+    "search": "Search tasks",
+    "searchTasks": "Search tasks..."
   },
   "calendar": {
     "title": "Calendar",

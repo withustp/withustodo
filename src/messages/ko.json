@@ -54,11 +54,23 @@
     "todo": "진행 전",
     "inProgress": "진행 중",
     "done": "완료",
+    "status": {
+      "todo": "진행 전",
+      "in_progress": "진행 중",
+      "done": "완료"
+    },
     "priority": "우선순위",
     "high": "높음",
     "medium": "보통",
     "low": "낮음",
     "none": "없음",
+    "table": {
+      "title": "제목",
+      "status": "상태",
+      "priority": "우선순위",
+      "category": "카테고리",
+      "dueDate": "마감일"
+    },
     "dueDate": "마감일",
     "reminder": "알림",
     "category": "카테고리",
@@ -72,11 +84,17 @@
     "filters": "필터",
     "clearFilters": "필터 초기화",
     "bulkActions": "일괄 작업",
+    "selectedCount": "{count}개 선택됨",
+    "markDone": "완료 처리",
+    "detailTitle": "할 일 상세",
+    "taskTitlePlaceholder": "할 일 제목",
+    "addDescription": "설명 추가...",
     "selectAll": "전체 선택",
     "deleteSelected": "선택 삭제",
     "moveCategory": "카테고리 이동",
     "changePriority": "우선순위 변경",
-    "search": "할 일 검색"
+    "search": "할 일 검색",
+    "searchTasks": "할 일 검색..."
   },
   "calendar": {
     "title": "캘린더",
