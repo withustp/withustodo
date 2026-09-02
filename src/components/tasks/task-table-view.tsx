@@ -52,7 +52,11 @@ export function TaskTableView() {
                   {task.title}
                 </td>
                 <td className="p-3">
-                  <Badge variant="outline" className="capitalize text-xs">{t(`status.${task.status}`)}</Badge>
+                  <Badge variant="outline" className="capitalize text-xs">
+                    {task.status && ['todo', 'in_progress', 'done'].includes(task.status) 
+                      ? t(`status.${task.status}`) 
+                      : t('status.todo')}
+                  </Badge>
                 </td>
                 <td className="p-3">
                   <Badge variant="outline" className={cn(
@@ -61,7 +65,9 @@ export function TaskTableView() {
                     task.priority === 'medium' && "text-warning border-warning/50",
                     task.priority === 'low' && "text-primary border-primary/50"
                   )}>
-                    {t(`priority.${task.priority}`)}
+                    {task.priority && ['high', 'medium', 'low', 'none'].includes(task.priority)
+                      ? t(`priority.${task.priority}`)
+                      : t('priority.none')}
                   </Badge>
                 </td>
                 <td className="p-3 text-xs text-muted-foreground">

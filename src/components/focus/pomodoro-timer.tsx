@@ -6,6 +6,7 @@ import { Play, Pause, Square, SkipForward } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { motion } from 'framer-motion';
 import { useTimer } from '@/hooks/use-timer';
+import { useTasks } from '@/hooks/use-tasks';
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '@/components/ui/select';
 
 /**

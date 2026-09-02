@@ -192,6 +192,10 @@
     },
     "dueDate": "Due Date",
     "reminder": "Reminder",
+    "loading": "Loading...",
+    "delete": "Delete",
+    "cancel": "Cancel",
+    "save": "Save",
     "category": "Category",
     "subtasks": "Subtasks",
     "attachments": "Attachments",
@@ -261,6 +265,9 @@
   "Calendar": {
     "title": "Calendar",
     "subtitle": "Schedule and track deadlines seamlessly.",
+    "today": "Today",
+    "month": "Month",
+    "week": "Week",
     "Grid": {
       "days": {
         "sun": "Sun",

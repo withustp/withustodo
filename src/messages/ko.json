@@ -192,6 +192,10 @@
     },
     "dueDate": "마감일",
     "reminder": "알림",
+    "loading": "로딩 중...",
+    "delete": "삭제",
+    "cancel": "취소",
+    "save": "저장",
     "category": "카테고리",
     "subtasks": "하위 작업",
     "attachments": "첨부 파일",
@@ -261,6 +265,9 @@
   "Calendar": {
     "title": "캘린더",
     "subtitle": "일정 및 마감일을 한눈에 파악하세요.",
+    "today": "오늘",
+    "month": "월",
+    "week": "주",
     "Grid": {
       "days": {
         "sun": "일",
