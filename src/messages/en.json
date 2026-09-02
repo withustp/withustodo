@@ -9,12 +9,40 @@
     "search": "Search",
     "noResults": "No results found"
   },
+  "Common": {
+    "appName": "WithUs Todo",
+    "loading": "Loading...",
+    "save": "Save",
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "confirm": "Confirm",
+    "search": "Search",
+    "noResults": "No results found"
+  },
+  "Auth": {
+    "login": "Login",
+    "welcome": "Welcome back",
+    "subtitle": "Manage all your tasks and productivity in one beautiful place.",
+    "continueWithKakao": "Continue with Kakao",
+    "continueWithGoogle": "Continue with Google",
+    "logout": "Logout"
+  },
   "auth": {
     "login": "Login",
-    "loginWithKakao": "Login with Kakao",
-    "loginWithGoogle": "Login with Google",
-    "logout": "Logout",
-    "welcome": "Welcome back"
+    "welcome": "Welcome back",
+    "subtitle": "Manage all your tasks and productivity in one beautiful place.",
+    "continueWithKakao": "Continue with Kakao",
+    "continueWithGoogle": "Continue with Google",
+    "logout": "Logout"
+  },
+  "Navigation": {
+    "dashboard": "Dashboard",
+    "tasks": "Tasks",
+    "calendar": "Calendar",
+    "categories": "Categories",
+    "focus": "Focus",
+    "settings": "Settings",
+    "trash": "Trash"
   },
   "nav": {
     "dashboard": "Dashboard",
@@ -25,8 +53,85 @@
     "settings": "Settings",
     "trash": "Trash"
   },
+  "Header": {
+    "welcome": "WithUs Todo",
+    "search": "Search",
+    "quickAdd": "Quick Add",
+    "notifications": "Notifications",
+    "toggleLanguage": "Toggle Language",
+    "toggleTheme": "Toggle Theme"
+  },
+  "CommandPalette": {
+    "placeholder": "Type a command or search tasks...",
+    "noResults": "No results found.",
+    "actions": "Actions",
+    "navigation": "Navigation",
+    "createTask": "Create Task",
+    "theme": "Toggle Theme",
+    "language": "Toggle Language"
+  },
+  "Dashboard": {
+    "title": "Dashboard",
+    "goodMorning": "Good morning",
+    "goodAfternoon": "Good afternoon",
+    "goodEvening": "Good evening",
+    "TodaySummary": {
+      "title": "Today's Summary",
+      "pending": "Pending",
+      "completed": "Completed",
+      "overdue": "Overdue",
+      "completionRate": "Completion Rate"
+    },
+    "ProductivityScore": {
+      "title": "Productivity Score",
+      "score": "pts",
+      "level": "Level",
+      "insight": "Focus Insight"
+    },
+    "StreakCounter": {
+      "title": "Daily Streak",
+      "days": "Days",
+      "currentStreak": "Current Streak",
+      "bestStreak": "Best Streak"
+    },
+    "WeeklyChart": {
+      "title": "Weekly Progress",
+      "completed": "Completed",
+      "created": "Created"
+    },
+    "CategoryBreakdown": {
+      "title": "Category Breakdown"
+    },
+    "TimeSpent": {
+      "title": "Time Spent Today",
+      "hours": "hrs",
+      "minutes": "mins",
+      "today": "Total Today"
+    },
+    "PriorityDistribution": {
+      "title": "Priority Distribution",
+      "high": "High",
+      "medium": "Medium",
+      "low": "Low",
+      "none": "None"
+    },
+    "UpcomingDeadlines": {
+      "title": "Upcoming Deadlines",
+      "viewAll": "View All",
+      "empty": "No upcoming deadlines.",
+      "priority": {
+        "high": "High",
+        "medium": "Medium",
+        "low": "Low",
+        "none": "None"
+      }
+    }
+  },
   "dashboard": {
     "title": "Dashboard",
+    "goodMorning": "Good morning",
+    "goodAfternoon": "Good afternoon",
+    "goodEvening": "Good evening",
     "todaySummary": "Today's Summary",
     "weeklyProgress": "Weekly Progress",
     "categoryBreakdown": "Category Breakdown",
@@ -59,7 +164,12 @@
       "in_progress": "In Progress",
       "done": "Done"
     },
-    "priority": "Priority",
+    "priority": {
+      "high": "High",
+      "medium": "Medium",
+      "low": "Low",
+      "none": "None"
+    },
     "high": "High",
     "medium": "Medium",
     "low": "Low",
@@ -80,15 +190,15 @@
     "estimated": "Estimated",
     "actual": "Actual",
     "description": "Description",
-    "noTasks": "No tasks found",
+    "noTasks": "No tasks found.",
     "filters": "Filters",
     "clearFilters": "Clear Filters",
     "bulkActions": "Bulk Actions",
     "selectedCount": "{count} tasks selected",
     "markDone": "Mark Done",
     "detailTitle": "Task Details",
-    "taskTitlePlaceholder": "Task title",
-    "addDescription": "Add description...",
+    "taskTitlePlaceholder": "Task title...",
+    "addDescription": "Add notes or description...",
     "selectAll": "Select All",
     "deleteSelected": "Delete Selected",
     "moveCategory": "Move Category",
@@ -96,12 +206,34 @@
     "search": "Search tasks",
     "searchTasks": "Search tasks..."
   },
-  "calendar": {
-    "title": "Calendar",
-    "month": "Month",
-    "week": "Week",
-    "today": "Today",
-    "noEvents": "No events"
+  "Tasks": {
+    "title": "Tasks",
+    "createTask": "Create Task",
+    "editTask": "Edit Task",
+    "deleteTask": "Delete Task",
+    "viewAll": "View All",
+    "listView": "List View",
+    "kanbanView": "Kanban View",
+    "tableView": "Table View",
+    "todo": "To Do",
+    "inProgress": "In Progress",
+    "done": "Done"
+  },
+  "Categories": {
+    "title": "Categories",
+    "subtitle": "Organize your tasks into structured domains.",
+    "addCategory": "Add Category",
+    "Card": {
+      "tasks": "tasks"
+    },
+    "Form": {
+      "title": "Category Form",
+      "nameLabel": "Category Name",
+      "namePlaceholder": "e.g. Work, Personal, Study",
+      "colorLabel": "Theme Color",
+      "cancel": "Cancel",
+      "save": "Save"
+    }
   },
   "categories": {
     "title": "Categories",
@@ -117,6 +249,56 @@
     "study": "Study",
     "finance": "Finance"
   },
+  "Calendar": {
+    "title": "Calendar",
+    "subtitle": "Schedule and track deadlines seamlessly.",
+    "Grid": {
+      "days": {
+        "sun": "Sun",
+        "mon": "Mon",
+        "tue": "Tue",
+        "wed": "Wed",
+        "thu": "Thu",
+        "fri": "Fri",
+        "sat": "Sat"
+      }
+    },
+    "DayDetail": {
+      "empty": "No tasks scheduled for this day.",
+      "priority": {
+        "high": "High",
+        "medium": "Medium",
+        "low": "Low",
+        "none": "None"
+      }
+    }
+  },
+  "calendar": {
+    "title": "Calendar",
+    "month": "Month",
+    "week": "Week",
+    "today": "Today",
+    "noEvents": "No events"
+  },
+  "Focus": {
+    "title": "Focus Mode",
+    "subtitle": "Supercharge your productivity with the Pomodoro technique.",
+    "Timer": {
+      "selectTask": "Select Task to Focus",
+      "noTask": "Free Focus (No task)",
+      "phases": {
+        "work": "Focus Session",
+        "break": "Short Break",
+        "longBreak": "Long Break"
+      }
+    },
+    "History": {
+      "title": "Today's Focus History",
+      "noHistory": "No focus sessions completed yet.",
+      "duration": "Duration",
+      "minutes": "mins"
+    }
+  },
   "focus": {
     "title": "Focus",
     "pomodoro": "Pomodoro",
@@ -130,6 +312,61 @@
     "selectTask": "Select Task",
     "history": "History",
     "minutesShort": "min"
+  },
+  "Trash": {
+    "title": "Trash",
+    "subtitle": "Restore or permanently purge deleted items.",
+    "emptyTrash": "Empty Trash",
+    "info": "Items in trash can be restored or permanently removed at any time.",
+    "restore": "Restore",
+    "delete": "Delete Permanently",
+    "emptyState": "Trash is empty.",
+    "deletedOn": "Deleted on"
+  },
+  "trash": {
+    "title": "Trash",
+    "restore": "Restore",
+    "deletePermanently": "Delete Permanently",
+    "emptyTrash": "Empty Trash",
+    "autoDelete": "Auto Delete"
+  },
+  "Settings": {
+    "title": "Settings",
+    "subtitle": "Manage your profile, preferences, and data.",
+    "Profile": {
+      "title": "Profile Settings",
+      "name": "Name",
+      "email": "Email",
+      "save": "Save Changes",
+      "connectedAccounts": "Connected Accounts"
+    },
+    "Appearance": {
+      "title": "Appearance & Theme",
+      "theme": "Theme",
+      "language": "Language"
+    },
+    "Kakao": {
+      "title": "Kakao Talk Smart Reminders",
+      "description": "Receive automated task reminders directly in your Kakao Talk.",
+      "connected": "Connected",
+      "testMessageTitle": "Test Notification",
+      "testMessageDesc": "Send a test reminder to your connected Kakao account.",
+      "sendTest": "Send Test",
+      "sending": "Sending...",
+      "testSuccess": "Kakao message sent successfully!",
+      "testFailed": "Failed to send message. Please check token."
+    },
+    "Reminders": {
+      "title": "Reminder Schedules & Quiet Hours"
+    },
+    "Data": {
+      "title": "Data Management & Export",
+      "export": "Export Data",
+      "exportCSV": "Download CSV",
+      "exportJSON": "Full JSON Backup",
+      "clearCompleted": "Clear Completed Tasks",
+      "deleteAccount": "Delete Account"
+    }
   },
   "settings": {
     "title": "Settings",
@@ -160,6 +397,15 @@
     "clearCompleted": "Clear Completed",
     "deleteAccount": "Delete Account"
   },
+  "Notifications": {
+    "title": "Notifications",
+    "markAllRead": "Mark all as read",
+    "clearAll": "Clear all",
+    "noNotifications": "No notifications yet.",
+    "reminder": "Reminder",
+    "system": "System",
+    "achievement": "Achievement"
+  },
   "notifications": {
     "title": "Notifications",
     "markAllRead": "Mark All as Read",
@@ -169,15 +415,8 @@
     "system": "System",
     "achievement": "Achievement"
   },
-  "trash": {
-    "title": "Trash",
-    "restore": "Restore",
-    "deletePermanently": "Delete Permanently",
-    "emptyTrash": "Empty Trash",
-    "autoDelete": "Auto Delete"
-  },
   "time": {
-    "minutes": "minutes",
+    "minutes": "mins",
     "hours": "hours",
     "days": "days",
     "ago": "ago",
