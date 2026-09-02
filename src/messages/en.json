@@ -55,20 +55,29 @@
   },
   "Header": {
     "welcome": "WithUs Todo",
-    "search": "Search",
-    "quickAdd": "Quick Add",
+    "search": "Search (⌘K)",
+    "quickAdd": "Quick Add Task",
     "notifications": "Notifications",
     "toggleLanguage": "Toggle Language",
     "toggleTheme": "Toggle Theme"
   },
   "CommandPalette": {
     "placeholder": "Type a command or search tasks...",
-    "noResults": "No results found.",
+    "noResults": "No matching results found.",
     "actions": "Actions",
     "navigation": "Navigation",
-    "createTask": "Create Task",
-    "theme": "Toggle Theme",
-    "language": "Toggle Language"
+    "newTask": "Create New Task",
+    "createTask": "Create New Task",
+    "toggleTheme": "Toggle Theme Mode",
+    "theme": "Toggle Theme Mode",
+    "toggleLanguage": "Toggle Display Language",
+    "language": "Toggle Display Language",
+    "dashboard": "Go to Dashboard",
+    "tasks": "Go to Tasks",
+    "calendar": "Go to Calendar",
+    "categories": "Go to Categories",
+    "focus": "Go to Focus Timer",
+    "settings": "Go to Settings"
   },
   "Dashboard": {
     "title": "Dashboard",
@@ -127,7 +136,7 @@
     "UpcomingDeadlines": {
       "title": "Upcoming Deadlines",
       "viewAll": "View All",
-      "empty": "No upcoming deadlines.",
+      "empty": "No upcoming deadlines scheduled.",
       "priority": {
         "high": "High",
         "medium": "Medium",
@@ -157,7 +166,7 @@
     "minutes": "Minutes"
   },
   "tasks": {
-    "title": "Tasks",
+    "title": "Tasks Management",
     "createTask": "Create Task",
     "editTask": "Edit Task",
     "deleteTask": "Delete Task",
@@ -168,6 +177,10 @@
     "todo": "To Do",
     "inProgress": "In Progress",
     "done": "Done",
+    "loading": "Loading tasks...",
+    "delete": "Delete",
+    "cancel": "Cancel",
+    "save": "Save",
     "status": {
       "todo": "To Do",
       "in_progress": "In Progress",
@@ -192,35 +205,31 @@
     },
     "dueDate": "Due Date",
     "reminder": "Reminder",
-    "loading": "Loading...",
-    "delete": "Delete",
-    "cancel": "Cancel",
-    "save": "Save",
     "category": "Category",
     "subtasks": "Subtasks",
     "attachments": "Attachments",
     "recurring": "Recurring",
-    "estimated": "Estimated",
-    "actual": "Actual",
+    "estimated": "Estimated Time",
+    "actual": "Actual Time",
     "description": "Description",
-    "noTasks": "No tasks found.",
+    "noTasks": "No tasks registered yet.",
     "filters": "Filters",
     "clearFilters": "Clear Filters",
     "bulkActions": "Bulk Actions",
     "selectedCount": "{count} tasks selected",
-    "markDone": "Mark Done",
+    "markDone": "Mark as Done",
     "detailTitle": "Task Details",
-    "taskTitlePlaceholder": "Task title...",
-    "addDescription": "Add notes or description...",
+    "taskTitlePlaceholder": "Enter task title...",
+    "addDescription": "Add notes or detailed description...",
     "selectAll": "Select All",
     "deleteSelected": "Delete Selected",
     "moveCategory": "Move Category",
     "changePriority": "Change Priority",
-    "search": "Search tasks",
+    "search": "Search Tasks",
     "searchTasks": "Search tasks..."
   },
   "Tasks": {
-    "title": "Tasks",
+    "title": "Tasks Management",
     "createTask": "Create Task",
     "editTask": "Edit Task",
     "deleteTask": "Delete Task",
@@ -230,17 +239,18 @@
     "tableView": "Table View",
     "todo": "To Do",
     "inProgress": "In Progress",
-    "done": "Done"
+    "done": "Done",
+    "loading": "Loading..."
   },
   "Categories": {
     "title": "Categories",
     "subtitle": "Organize your tasks into structured domains.",
-    "addCategory": "Add Category",
+    "addCategory": "Add New Category",
     "Card": {
       "tasks": "tasks"
     },
     "Form": {
-      "title": "Category Form",
+      "title": "Category Settings",
       "nameLabel": "Category Name",
       "namePlaceholder": "e.g. Work, Personal, Study",
       "colorLabel": "Theme Color",
@@ -294,14 +304,14 @@
     "month": "Month",
     "week": "Week",
     "today": "Today",
-    "noEvents": "No events"
+    "noEvents": "No events registered."
   },
   "Focus": {
     "title": "Focus Mode",
     "subtitle": "Supercharge your productivity with the Pomodoro technique.",
     "Timer": {
       "selectTask": "Select Task to Focus",
-      "noTask": "Free Focus (No task)",
+      "noTask": "Free Focus (No specific task)",
       "phases": {
         "work": "Focus Session",
         "break": "Short Break",
@@ -310,15 +320,16 @@
     },
     "History": {
       "title": "Today's Focus History",
-      "noHistory": "No focus sessions completed yet.",
+      "totalTime": "Total Focus Time: {time}",
+      "empty": "No completed focus sessions yet.",
       "duration": "Duration",
       "minutes": "mins"
     }
   },
   "focus": {
-    "title": "Focus",
+    "title": "Focus Mode",
     "pomodoro": "Pomodoro",
-    "work": "Work",
+    "work": "Focus",
     "break": "Break",
     "longBreak": "Long Break",
     "start": "Start",
@@ -327,13 +338,13 @@
     "sessions": "Sessions",
     "selectTask": "Select Task",
     "history": "History",
-    "minutesShort": "min"
+    "minutesShort": "mins"
   },
   "Trash": {
     "title": "Trash",
     "subtitle": "Restore or permanently purge deleted items.",
     "emptyTrash": "Empty Trash",
-    "info": "Items in trash can be restored or permanently removed at any time.",
+    "info": "Items in trash can be restored or permanently deleted at any time.",
     "restore": "Restore",
     "delete": "Delete Permanently",
     "emptyState": "Trash is empty.",
@@ -350,16 +361,21 @@
     "title": "Settings",
     "subtitle": "Manage your profile, preferences, and data.",
     "Profile": {
-      "title": "Profile Settings",
-      "name": "Name",
-      "email": "Email",
+      "title": "Basic Profile Information",
+      "name": "Display Name",
+      "email": "Email Address",
       "save": "Save Changes",
-      "connectedAccounts": "Connected Accounts"
+      "connectedAccounts": "Connected Social Accounts"
     },
     "Appearance": {
       "title": "Appearance & Theme",
-      "theme": "Theme",
-      "language": "Language"
+      "theme": "Select Theme",
+      "language": "Default Language",
+      "themes": {
+        "light": "Light Mode",
+        "dark": "Dark Mode",
+        "system": "System Default"
+      }
     },
     "Kakao": {
       "title": "Kakao Talk Smart Reminders",
@@ -373,15 +389,29 @@
       "testFailed": "Failed to send message. Please check token."
     },
     "Reminders": {
-      "title": "Reminder Schedules & Quiet Hours"
+      "title": "Reminder Schedules & Quiet Hours",
+      "defaultInterval": "Default Reminder Interval",
+      "intervals": {
+        "0": "At time of event",
+        "15": "15 minutes before",
+        "30": "30 minutes before",
+        "60": "1 hour before"
+      },
+      "quietHours": "Quiet Hours",
+      "quietHoursDesc": "Push and Kakao notifications will be muted during this period.",
+      "start": "Start Time",
+      "end": "End Time"
     },
     "Data": {
-      "title": "Data Management & Export",
-      "export": "Export Data",
-      "exportCSV": "Download CSV",
-      "exportJSON": "Full JSON Backup",
+      "title": "Danger Zone & Data Management",
+      "exportData": "Export Data",
+      "exportDesc": "Backup all your tasks and categories into a downloadable file.",
       "clearCompleted": "Clear Completed Tasks",
-      "deleteAccount": "Delete Account"
+      "clearCompletedDesc": "Move all completed tasks to the trash bin.",
+      "clearCompletedBtn": "Clear Completed",
+      "deleteAccount": "Delete Account Permanently",
+      "deleteAccountDesc": "Your account and all related data will be permanently purged.",
+      "deleteAccountBtn": "Delete Account"
     }
   },
   "settings": {
@@ -389,13 +419,13 @@
     "profile": "Profile",
     "appearance": "Appearance",
     "theme": "Theme",
-    "dark": "Dark",
-    "light": "Light",
-    "system": "System",
+    "dark": "Dark Mode",
+    "light": "Light Mode",
+    "system": "System Default",
     "language": "Language",
     "english": "English",
     "korean": "Korean",
-    "kakao": "Kakao",
+    "kakao": "Kakao Talk",
     "kakaoStatus": "Kakao Status",
     "connected": "Connected",
     "disconnected": "Disconnected",
@@ -406,10 +436,10 @@
     "quietHours": "Quiet Hours",
     "quietHoursStart": "Quiet Hours Start",
     "quietHoursEnd": "Quiet Hours End",
-    "data": "Data",
-    "export": "Export",
+    "data": "Data Management",
+    "export": "Export Data",
     "exportCSV": "Export CSV",
-    "exportJSON": "Export JSON",
+    "exportJSON": "JSON Backup",
     "clearCompleted": "Clear Completed",
     "deleteAccount": "Delete Account"
   },
@@ -417,6 +447,7 @@
     "title": "Notifications",
     "markAllRead": "Mark all as read",
     "clearAll": "Clear all",
+    "empty": "No notifications yet.",
     "noNotifications": "No notifications yet.",
     "reminder": "Reminder",
     "system": "System",
@@ -426,6 +457,7 @@
     "title": "Notifications",
     "markAllRead": "Mark All as Read",
     "clearAll": "Clear All",
+    "empty": "No notifications",
     "noNotifications": "No notifications",
     "reminder": "Reminder",
     "system": "System",

@@ -55,20 +55,29 @@
   },
   "Header": {
     "welcome": "WithUs Todo",
-    "search": "검색",
-    "quickAdd": "빠른 등록",
+    "search": "검색 (⌘K)",
+    "quickAdd": "빠른 할 일 등록",
     "notifications": "알림",
     "toggleLanguage": "언어 변경",
     "toggleTheme": "테마 전환"
   },
   "CommandPalette": {
-    "placeholder": "명령어나 작업 검색...",
-    "noResults": "검색 결과가 없습니다.",
-    "actions": "작업",
+    "placeholder": "명령어를 입력하거나 할 일을 검색하세요...",
+    "noResults": "일치하는 결과가 없습니다.",
+    "actions": "주요 작업",
     "navigation": "바로가기",
+    "newTask": "새 할 일 생성",
     "createTask": "새 할 일 생성",
-    "theme": "테마 전환",
-    "language": "언어 변경"
+    "toggleTheme": "테마 모드 전환",
+    "theme": "테마 모드 전환",
+    "toggleLanguage": "표시 언어 변경",
+    "language": "표시 언어 변경",
+    "dashboard": "대시보드로 이동",
+    "tasks": "할 일 목록으로 이동",
+    "calendar": "캘린더로 이동",
+    "categories": "카테고리로 이동",
+    "focus": "뽀모도로 타이머로 이동",
+    "settings": "환경설정으로 이동"
   },
   "Dashboard": {
     "title": "대시보드",
@@ -157,7 +166,7 @@
     "minutes": "분"
   },
   "tasks": {
-    "title": "할 일",
+    "title": "할 일 관리",
     "createTask": "새 할 일",
     "editTask": "할 일 수정",
     "deleteTask": "할 일 삭제",
@@ -168,6 +177,10 @@
     "todo": "진행 전",
     "inProgress": "진행 중",
     "done": "완료",
+    "loading": "할 일을 불러오는 중...",
+    "delete": "삭제",
+    "cancel": "취소",
+    "save": "저장",
     "status": {
       "todo": "진행 전",
       "in_progress": "진행 중",
@@ -192,10 +205,6 @@
     },
     "dueDate": "마감일",
     "reminder": "알림",
-    "loading": "로딩 중...",
-    "delete": "삭제",
-    "cancel": "취소",
-    "save": "저장",
     "category": "카테고리",
     "subtasks": "하위 작업",
     "attachments": "첨부 파일",
@@ -209,7 +218,7 @@
     "bulkActions": "일괄 작업",
     "selectedCount": "{count}개 선택됨",
     "markDone": "완료 처리",
-    "detailTitle": "할 일 상세",
+    "detailTitle": "할 일 상세 정보",
     "taskTitlePlaceholder": "할 일 제목 입력...",
     "addDescription": "상세 설명이나 메모를 남겨보세요...",
     "selectAll": "전체 선택",
@@ -220,7 +229,7 @@
     "searchTasks": "할 일 검색..."
   },
   "Tasks": {
-    "title": "할 일",
+    "title": "할 일 관리",
     "createTask": "새 할 일",
     "editTask": "할 일 수정",
     "deleteTask": "할 일 삭제",
@@ -230,19 +239,20 @@
     "tableView": "표 보기",
     "todo": "진행 전",
     "inProgress": "진행 중",
-    "done": "완료"
+    "done": "완료",
+    "loading": "로딩 중..."
   },
   "Categories": {
     "title": "카테고리",
     "subtitle": "작업을 분야별로 체계적으로 분류하고 관리하세요.",
-    "addCategory": "새 카테고리",
+    "addCategory": "새 카테고리 추가",
     "Card": {
       "tasks": "개의 작업"
     },
     "Form": {
-      "title": "카테고리 추가 / 수정",
+      "title": "카테고리 설정",
       "nameLabel": "카테고리 이름",
-      "namePlaceholder": "예: 업무, 개인, 프로젝트",
+      "namePlaceholder": "예: 업무, 개인 프로젝트, 학습",
       "colorLabel": "테마 색상",
       "cancel": "취소",
       "save": "저장"
@@ -266,8 +276,8 @@
     "title": "캘린더",
     "subtitle": "일정 및 마감일을 한눈에 파악하세요.",
     "today": "오늘",
-    "month": "월",
-    "week": "주",
+    "month": "월간",
+    "week": "주간",
     "Grid": {
       "days": {
         "sun": "일",
@@ -291,10 +301,10 @@
   },
   "calendar": {
     "title": "캘린더",
-    "month": "월",
-    "week": "주",
+    "month": "월간",
+    "week": "주간",
     "today": "오늘",
-    "noEvents": "일정이 없습니다"
+    "noEvents": "등록된 일정이 없습니다."
   },
   "Focus": {
     "title": "집중 모드",
@@ -310,15 +320,16 @@
     },
     "History": {
       "title": "오늘의 집중 기록",
-      "noHistory": "아직 완료된 집중 세션이 없습니다.",
+      "totalTime": "총 집중 시간: {time}",
+      "empty": "아직 완료된 집중 세션이 없습니다.",
       "duration": "집중 시간",
       "minutes": "분"
     }
   },
   "focus": {
-    "title": "집중",
+    "title": "집중 모드",
     "pomodoro": "뽀모도로",
-    "work": "작업",
+    "work": "집중",
     "break": "휴식",
     "longBreak": "긴 휴식",
     "start": "시작",
@@ -347,19 +358,24 @@
     "autoDelete": "자동 삭제"
   },
   "Settings": {
-    "title": "설정",
+    "title": "환경 설정",
     "subtitle": "계정, 알림, 테마 및 데이터 설정을 맞춤 구성하세요.",
     "Profile": {
-      "title": "프로필 설정",
-      "name": "이름",
-      "email": "이메일",
-      "save": "저장",
+      "title": "기본 프로필 정보",
+      "name": "표시 이름",
+      "email": "이메일 주소",
+      "save": "변경사항 저장",
       "connectedAccounts": "연결된 소셜 계정"
     },
     "Appearance": {
       "title": "테마 및 인터페이스",
       "theme": "테마 선택",
-      "language": "기본 언어"
+      "language": "기본 언어",
+      "themes": {
+        "light": "라이트 모드",
+        "dark": "다크 모드",
+        "system": "시스템 설정"
+      }
     },
     "Kakao": {
       "title": "카카오톡 스마트 알림",
@@ -373,50 +389,65 @@
       "testFailed": "메시지 전송에 실패했습니다. 카카오 토큰을 확인해 주세요."
     },
     "Reminders": {
-      "title": "알림 주기 및 방해 금지 설정"
+      "title": "알림 주기 및 방해 금지 설정",
+      "defaultInterval": "기본 알림 간격",
+      "intervals": {
+        "0": "마감 시간 정각",
+        "15": "15분 전",
+        "30": "30분 전",
+        "60": "1시간 전"
+      },
+      "quietHours": "방해 금지 시간 설정",
+      "quietHoursDesc": "지정한 시간대에는 푸시 및 카카오톡 알림을 전송하지 않습니다.",
+      "start": "시작 시간",
+      "end": "종료 시간"
     },
     "Data": {
-      "title": "데이터 관리 및 내보내기",
-      "export": "데이터 내보내기",
-      "exportCSV": "CSV 파일 다운로드",
-      "exportJSON": "JSON 전체 백업",
-      "clearCompleted": "완료된 작업 일괄 정리",
-      "deleteAccount": "회원 탈퇴"
+      "title": "위험 구역 & 데이터 관리",
+      "exportData": "데이터 내보내기",
+      "exportDesc": "등록된 모든 할 일 및 카테고리 데이터를 파일로 백업합니다.",
+      "clearCompleted": "완료된 항목 일괄 정리",
+      "clearCompletedDesc": "완료 처리된 모든 할 일을 휴지통으로 이동합니다.",
+      "clearCompletedBtn": "완료 항목 정리",
+      "deleteAccount": "계정 영구 삭제",
+      "deleteAccountDesc": "계정과 모든 연동 데이터가 영구적으로 삭제되며 복구할 수 없습니다.",
+      "deleteAccountBtn": "계정 탈퇴"
     }
   },
   "settings": {
-    "title": "설정",
+    "title": "환경 설정",
     "profile": "프로필",
     "appearance": "외관",
     "theme": "테마",
-    "dark": "어둡게",
-    "light": "밝게",
-    "system": "시스템",
+    "dark": "다크 모드",
+    "light": "라이트 모드",
+    "system": "시스템 설정",
     "language": "언어",
     "english": "English",
     "korean": "한국어",
-    "kakao": "카카오",
+    "kakao": "카카오톡",
     "kakaoStatus": "카카오 상태",
     "connected": "연결됨",
     "disconnected": "연결 끊김",
     "testMessage": "테스트 메시지",
     "sendTest": "테스트 전송",
-    "reminders": "알림",
+    "reminders": "알림 설정",
     "defaultInterval": "기본 간격",
     "quietHours": "방해 금지 시간",
     "quietHoursStart": "방해 금지 시작",
     "quietHoursEnd": "방해 금지 종료",
-    "data": "데이터",
+    "data": "데이터 관리",
     "export": "내보내기",
     "exportCSV": "CSV 내보내기",
-    "exportJSON": "JSON 내보내기",
+    "exportJSON": "JSON 백업",
     "clearCompleted": "완료된 항목 정리",
-    "deleteAccount": "계정 삭제"
+    "deleteAccount": "계정 탈퇴"
   },
   "Notifications": {
     "title": "알림 센터",
     "markAllRead": "모두 읽음",
     "clearAll": "전체 삭제",
+    "empty": "새로운 알림이 없습니다.",
     "noNotifications": "새로운 알림이 없습니다.",
     "reminder": "리마인더",
     "system": "시스템",
@@ -426,6 +457,7 @@
     "title": "알림",
     "markAllRead": "모두 읽음으로 표시",
     "clearAll": "모두 지우기",
+    "empty": "알림이 없습니다",
     "noNotifications": "알림이 없습니다",
     "reminder": "리마인더",
     "system": "시스템",

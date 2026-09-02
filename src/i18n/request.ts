@@ -4,7 +4,7 @@ import { cookies } from 'next/headers';
 /**
  * Configure next-intl for the server.
  * Uses a cookie or a default locale for determining user preference.
- * Provides fallback handling so missing keys never throw uncaught exceptions.
+ * Provides clean fallback handling so raw developer paths never leak to the UI.
  */
 export default getRequestConfig(async () => {
   const cookieStore = await cookies();
@@ -21,14 +21,15 @@ export default getRequestConfig(async () => {
     locale,
     messages,
     onError(error) {
-      // Suppress noisy missing message errors in production
       if (process.env.NODE_ENV !== 'production') {
         // eslint-disable-next-line no-console
         console.warn('[next-intl]', error.message);
       }
     },
-    getMessageFallback({ key, namespace }) {
-      return namespace ? `${namespace}.${key}` : key;
+    getMessageFallback({ key }) {
+      // Return the humanized last segment instead of the full raw dot path
+      const lastSegment = key.split('.').pop() || key;
+      return lastSegment.charAt(0).toUpperCase() + lastSegment.slice(1);
     },
   };
 });
