@@ -15,8 +15,11 @@ import {
   Trash2,
   ChevronLeft,
   ChevronRight,
-  CheckCircle,
+  Sparkles,
 } from 'lucide-react';
+import { useEffect, useState } from 'react';
+import { createClient } from '@/lib/supabase/client';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 
 const navItems = [
   { href: '/dashboard', icon: LayoutDashboard, labelKey: 'dashboard' },
@@ -28,12 +31,30 @@ const navItems = [
 ];
 
 /**
- * Desktop sidebar component.
+ * Desktop sidebar component with live authenticated user profile.
  */
 export function Sidebar() {
   const pathname = usePathname();
   const t = useTranslations('Navigation');
   const { isSidebarCollapsed, toggleSidebar } = useUIStore();
+  const [userName, setUserName] = useState('User');
+  const [userEmail, setUserEmail] = useState('');
+  const [avatarUrl, setAvatarUrl] = useState('');
+  const supabase = createClient();
+
+  useEffect(() => {
+    const loadUser = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user) {
+        setUserName(user.user_metadata?.full_name || user.user_metadata?.name || user.email?.split('@')[0] || 'User');
+        setUserEmail(user.email || '');
+        setAvatarUrl(user.user_metadata?.avatar_url || user.user_metadata?.picture || '');
+      }
+    };
+    loadUser();
+  }, [supabase]);
+
+  const initials = userName ? userName.slice(0, 2).toUpperCase() : 'WU';
 
   return (
     <aside
@@ -108,23 +129,46 @@ export function Sidebar() {
           </span>
         </Link>
 
-        <div className="flex items-center gap-3 px-3 py-2 border-t border-sidebar-border pt-4">
-          <div className="h-8 w-8 rounded-full bg-muted flex items-center justify-center shrink-0 overflow-hidden">
-            <span className="text-xs font-medium">US</span>
+        {/* Live User Profile Footer */}
+        <Link
+          href="/settings"
+          className={cn(
+            'flex items-center gap-3 px-2.5 py-2 rounded-xl border border-sidebar-border bg-sidebar-accent/30 hover:bg-sidebar-accent transition-all group pt-2.5 pb-2.5',
+            pathname.startsWith('/settings') && 'ring-1 ring-primary/40 bg-sidebar-accent'
+          )}
+          title={isSidebarCollapsed ? `${userName} (${userEmail})` : undefined}
+        >
+          <div className="relative shrink-0">
+            <Avatar className="h-8 w-8 border border-border shadow-sm">
+              <AvatarImage src={avatarUrl} alt={userName} className="object-cover" />
+              <AvatarFallback className="text-xs font-bold bg-primary/20 text-primary">
+                {initials}
+              </AvatarFallback>
+            </Avatar>
+            <span className="absolute bottom-0 right-0 w-2 h-2 rounded-full bg-emerald-500 ring-2 ring-sidebar" />
           </div>
-          <span
+
+          <div
             className={cn(
-              'text-sm font-medium truncate transition-opacity duration-300',
+              'flex flex-col min-w-0 transition-opacity duration-300',
               isSidebarCollapsed ? 'opacity-0 w-0 hidden' : 'opacity-100 w-auto'
             )}
           >
-            User
-          </span>
-        </div>
+            <div className="flex items-center gap-1.5">
+              <span className="text-xs font-semibold truncate text-foreground group-hover:text-primary transition-colors">
+                {userName}
+              </span>
+              <Sparkles className="w-2.5 h-2.5 text-primary shrink-0" />
+            </div>
+            <span className="text-[10px] text-muted-foreground truncate max-w-[130px]">
+              {userEmail || 'WithUs Pro'}
+            </span>
+          </div>
+        </Link>
 
         <button
           onClick={toggleSidebar}
-          className="mt-4 flex w-full items-center justify-center rounded-lg border border-sidebar-border bg-background/50 p-2 text-sidebar-muted hover:bg-sidebar-accent hover:text-sidebar-foreground transition-colors"
+          className="mt-3 flex w-full items-center justify-center rounded-lg border border-sidebar-border bg-background/50 p-2 text-sidebar-muted hover:bg-sidebar-accent hover:text-sidebar-foreground transition-colors"
           aria-label="Toggle Sidebar"
         >
           {isSidebarCollapsed ? (
