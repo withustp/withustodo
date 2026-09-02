@@ -1,17 +1,18 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useId } from 'react';
 import { createClient } from '@/lib/supabase/client';
 import { Task, TaskFilter } from '@/types';
 import { useTaskStore } from '@/stores/task-store';
 
 /**
- * Hook for task operations
+ * Hook for task operations with safe real-time updates and Zustand cache.
  */
 export function useTasks(filter?: TaskFilter) {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
   const supabase = createClient();
+  const hookId = useId().replace(/:/g, '');
   const { tasks, setTasks, addTask, updateTask: updateTaskInStore, deleteTask: deleteTaskFromStore } = useTaskStore();
 
   const fetchTasks = useCallback(async () => {
@@ -40,17 +41,20 @@ export function useTasks(filter?: TaskFilter) {
   useEffect(() => {
     fetchTasks();
     
+    // Use unique channel identifier to prevent collision across concurrent components
+    const channelName = `tasks-realtime-${hookId}`;
     const channel = supabase
-      .channel('tasks-changes')
+      .channel(channelName)
       .on('postgres_changes', { event: '*', schema: 'public', table: 'tasks' }, () => {
         fetchTasks();
-      })
-      .subscribe();
+      });
+
+    channel.subscribe();
 
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [fetchTasks, supabase]);
+  }, [fetchTasks, hookId, supabase]);
 
   const createTask = async (task: Partial<Task>) => {
     try {
@@ -106,9 +110,9 @@ export function useTasks(filter?: TaskFilter) {
     await updateTask(id, { status: newStatus });
   };
 
-  const reorderTasks = async (tasks: { id: string; sort_order: number }[]) => {
+  const reorderTasks = async (tasksList: { id: string; sort_order: number }[]) => {
     try {
-      const { error } = await supabase.from('tasks').upsert(tasks.map(t => ({ id: t.id, sort_order: t.sort_order })));
+      const { error } = await supabase.from('tasks').upsert(tasksList.map(t => ({ id: t.id, sort_order: t.sort_order })));
       if (error) throw error;
     } catch (err: any) {
       setError(err);

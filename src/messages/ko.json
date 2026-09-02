@@ -86,7 +86,9 @@
       "title": "생산성 점수",
       "score": "점",
       "level": "레벨",
-      "insight": "오늘의 집중도"
+      "insight": "오늘의 집중도",
+      "vsLastWeek": "지난주 대비",
+      "statusGreat": "매우 우수한 성취도"
     },
     "StreakCounter": {
       "title": "연속 달성",
@@ -106,14 +108,21 @@
       "title": "오늘의 집중 시간",
       "hours": "시간",
       "minutes": "분",
-      "today": "오늘 누적"
+      "today": "오늘 누적",
+      "vsYesterday": "어제 대비"
     },
     "PriorityDistribution": {
       "title": "우선순위 분포",
       "high": "높음",
       "medium": "보통",
       "low": "낮음",
-      "none": "없음"
+      "none": "없음",
+      "labels": {
+        "high": "높음",
+        "medium": "보통",
+        "low": "낮음",
+        "none": "없음"
+      }
     },
     "UpcomingDeadlines": {
       "title": "마감 임박 작업",

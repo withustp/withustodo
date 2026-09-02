@@ -86,7 +86,9 @@
       "title": "Productivity Score",
       "score": "pts",
       "level": "Level",
-      "insight": "Focus Insight"
+      "insight": "Focus Insight",
+      "vsLastWeek": "vs last week",
+      "statusGreat": "Excellent progress"
     },
     "StreakCounter": {
       "title": "Daily Streak",
@@ -106,14 +108,21 @@
       "title": "Time Spent Today",
       "hours": "hrs",
       "minutes": "mins",
-      "today": "Total Today"
+      "today": "Total Today",
+      "vsYesterday": "vs yesterday"
     },
     "PriorityDistribution": {
       "title": "Priority Distribution",
       "high": "High",
       "medium": "Medium",
       "low": "Low",
-      "none": "None"
+      "none": "None",
+      "labels": {
+        "high": "High",
+        "medium": "Medium",
+        "low": "Low",
+        "none": "None"
+      }
     },
     "UpcomingDeadlines": {
       "title": "Upcoming Deadlines",
