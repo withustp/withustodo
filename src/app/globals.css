@@ -255,3 +255,25 @@ body {
   background-size: 200% 100%;
   animation: shimmer 2s linear infinite;
 }
+
+/* --- Hide Netlify Injected Badge / Drawer --- */
+[data-netlify-deploy-id],
+iframe[id^="netlify-"],
+div[id^="netlify-"],
+div[class*="netlify-feedback"],
+.netlify-drawer,
+#netlify-drawer-container,
+[aria-label="Netlify Drawer"],
+[data-feedback-drawer],
+button[aria-label="Open Netlify Drawer"],
+div[data-netlify-drawer] {
+  display: none !important;
+  visibility: hidden !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
+  width: 0 !important;
+  height: 0 !important;
+  position: absolute !important;
+  z-index: -9999 !important;
+}
+
