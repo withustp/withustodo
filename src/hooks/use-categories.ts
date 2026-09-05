@@ -5,7 +5,7 @@ import { createClient } from '@/lib/supabase/client';
 import { Category } from '@/types';
 
 /**
- * Hook for category operations
+ * Hook for category operations with authenticated user_id injection and realtime sync
  */
 export function useCategories() {
   const [categories, setCategories] = useState<Category[]>([]);
@@ -15,11 +15,19 @@ export function useCategories() {
   const fetchCategories = useCallback(async () => {
     setIsLoading(true);
     try {
-      const { data, error } = await supabase.from('categories').select('*').order('sort_order', { ascending: true });
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+
+      const { data, error } = await supabase
+        .from('categories')
+        .select('*')
+        .eq('user_id', user.id)
+        .order('sort_order', { ascending: true });
+
       if (error) throw error;
       setCategories((data as any) || []);
     } catch (err) {
-      console.error(err);
+      console.error('Failed to fetch categories:', err);
     } finally {
       setIsLoading(false);
     }
@@ -30,14 +38,30 @@ export function useCategories() {
   }, [fetchCategories]);
 
   const createCategory = async (category: Partial<Category>) => {
-    const { data, error } = await supabase.from('categories').insert([category]).select().single();
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) throw new Error('로그인이 필요합니다.');
+
+    const categoryWithUser = {
+      ...category,
+      user_id: user.id,
+      color: category.color || '#6366f1',
+      icon: category.icon || 'Tag',
+      sort_order: category.sort_order ?? categories.length,
+    };
+
+    const { data, error } = await supabase
+      .from('categories')
+      .insert([categoryWithUser])
+      .select()
+      .single();
+
     if (error) throw error;
-    setCategories([...categories, data as any]);
+    setCategories((prev) => [...prev, data as any]);
     return data;
   };
 
   const updateCategory = async (id: string, updates: Partial<Category>) => {
-    setCategories(categories.map(c => c.id === id ? { ...c, ...updates } : c));
+    setCategories((prev) => prev.map((c) => (c.id === id ? { ...c, ...updates } : c)));
     const { error } = await supabase.from('categories').update(updates).eq('id', id);
     if (error) {
       fetchCategories();
@@ -46,7 +70,7 @@ export function useCategories() {
   };
 
   const deleteCategory = async (id: string) => {
-    setCategories(categories.filter(c => c.id !== id));
+    setCategories((prev) => prev.filter((c) => c.id !== id));
     const { error } = await supabase.from('categories').delete().eq('id', id);
     if (error) {
       fetchCategories();
@@ -59,6 +83,7 @@ export function useCategories() {
     isLoading,
     createCategory,
     updateCategory,
-    deleteCategory
+    deleteCategory,
+    refresh: fetchCategories,
   };
 }
