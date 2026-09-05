@@ -24,6 +24,12 @@ export const metadata: Metadata = {
     icon: '/logo.png',
     apple: '/logo.png',
   },
+  verification: {
+    google: '22lfROplFWCdORfEAIU0M0IKJIT5okcjgWa4Uzi31Cg',
+  },
+  other: {
+    'google-site-verification': '22lfROplFWCdORfEAIU0M0IKJIT5okcjgWa4Uzi31Cg',
+  },
 };
 
 /**
@@ -39,6 +45,9 @@ export default async function RootLayout({
 
   return (
     <html lang={locale} suppressHydrationWarning>
+      <head>
+        <meta name="google-site-verification" content="22lfROplFWCdORfEAIU0M0IKJIT5okcjgWa4Uzi31Cg" />
+      </head>
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
