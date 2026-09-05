@@ -19,7 +19,18 @@ export function useTasks(filter?: TaskFilter) {
     setIsLoading(true);
     setError(null);
     try {
-      let query = supabase.from('tasks').select('*, category:categories(*)').eq('is_deleted', false);
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        setTasks([]);
+        setIsLoading(false);
+        return;
+      }
+
+      let query = supabase
+        .from('tasks')
+        .select('*, category:categories(*)')
+        .eq('user_id', user.id)
+        .eq('is_deleted', false);
       
       if (filter) {
         if (filter.status && filter.status.length > 0) query = query.in('status', filter.status);
@@ -63,9 +74,8 @@ export function useTasks(filter?: TaskFilter) {
       let userId = task.user_id;
       if (!userId || userId === 'TEMP_USER_ID') {
         const { data: { user } } = await supabase.auth.getUser();
-        if (user) {
-          userId = user.id;
-        }
+        if (!user) throw new Error('로그인이 필요합니다.');
+        userId = user.id;
       }
 
       const { data, error } = await supabase
@@ -86,7 +96,10 @@ export function useTasks(filter?: TaskFilter) {
   const updateTask = async (id: string, updates: Partial<Task>) => {
     updateTaskInStore(id, updates);
     try {
-      const { error } = await supabase.from('tasks').update(updates).eq('id', id);
+      const { data: { user } } = await supabase.auth.getUser();
+      let query = supabase.from('tasks').update(updates).eq('id', id);
+      if (user) query = query.eq('user_id', user.id);
+      const { error } = await query;
       if (error) throw error;
     } catch (err: any) {
       setError(err);
@@ -98,7 +111,13 @@ export function useTasks(filter?: TaskFilter) {
   const deleteTask = async (id: string) => {
     updateTaskInStore(id, { is_deleted: true });
     try {
-      const { error } = await supabase.from('tasks').update({ is_deleted: true }).eq('id', id);
+      const { data: { user } } = await supabase.auth.getUser();
+      let query = supabase
+        .from('tasks')
+        .update({ is_deleted: true, deleted_at: new Date().toISOString() })
+        .eq('id', id);
+      if (user) query = query.eq('user_id', user.id);
+      const { error } = await query;
       if (error) throw error;
     } catch (err: any) {
       setError(err);

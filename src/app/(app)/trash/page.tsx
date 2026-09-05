@@ -23,9 +23,13 @@ export default function TrashPage() {
   const fetchDeleted = useCallback(async () => {
     setIsLoading(true);
     try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+
       const { data, error } = await supabase
         .from('tasks')
         .select('*, category:categories(*)')
+        .eq('user_id', user.id)
         .eq('is_deleted', true)
         .order('deleted_at', { ascending: false });
 
@@ -44,10 +48,14 @@ export default function TrashPage() {
 
   const handleRestore = async (id: string) => {
     try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+
       const { error } = await supabase
         .from('tasks')
         .update({ is_deleted: false, deleted_at: null })
-        .eq('id', id);
+        .eq('id', id)
+        .eq('user_id', user.id);
 
       if (error) throw error;
       setDeletedTasks(prev => prev.filter(t => t.id !== id));
@@ -59,10 +67,14 @@ export default function TrashPage() {
 
   const handlePermanentDelete = async (id: string) => {
     try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+
       const { error } = await supabase
         .from('tasks')
         .delete()
-        .eq('id', id);
+        .eq('id', id)
+        .eq('user_id', user.id);
 
       if (error) throw error;
       setDeletedTasks(prev => prev.filter(t => t.id !== id));
@@ -75,9 +87,13 @@ export default function TrashPage() {
   const handleEmptyTrash = async () => {
     if (deletedTasks.length === 0) return;
     try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+
       const { error } = await supabase
         .from('tasks')
         .delete()
+        .eq('user_id', user.id)
         .eq('is_deleted', true);
 
       if (error) throw error;

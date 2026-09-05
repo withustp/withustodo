@@ -14,6 +14,7 @@ export type Priority = 'high' | 'medium' | 'low' | 'none';
 
 // Task Status
 export type TaskStatus = 'todo' | 'in_progress' | 'done';
+export type Status = TaskStatus;
 
 // Task
 export type Task = {
@@ -48,7 +49,19 @@ export type RecurringType = 'daily' | 'weekly' | 'monthly';
 export type RecurringPattern = { type: RecurringType; interval: number; days_of_week?: number[]; day_of_month?: number; end_date?: string; }
 
 // Time Entry (Pomodoro)
-export type TimeEntry = { id: string; task_id: string | null; user_id: string; duration_seconds: number; type: 'work' | 'break'; started_at: string; ended_at: string; }
+export type TimeEntry = { 
+  id: string; 
+  task_id: string | null; 
+  user_id: string; 
+  duration_minutes: number; 
+  duration_seconds?: number; 
+  type: 'pomodoro' | 'short_break' | 'long_break' | 'work' | 'break'; 
+  completed_at?: string; 
+  started_at?: string; 
+  ended_at?: string; 
+  created_at?: string;
+  task?: { title: string };
+}
 
 // Activity Log
 export type ActivityAction = 'created' | 'updated' | 'completed' | 'uncompleted' | 'deleted' | 'restored' | 'moved';
