@@ -10,8 +10,8 @@ import { TimeSpent } from '@/components/dashboard/time-spent';
 import { UpcomingDeadlines } from '@/components/dashboard/upcoming-deadlines';
 import { PriorityDistribution } from '@/components/dashboard/priority-distribution';
 import { ProductivityScore } from '@/components/dashboard/productivity-score';
-import { useEffect, useState } from 'react';
-import { createClient } from '@/lib/supabase/client';
+import { useEffect } from 'react';
+import { useUserStore } from '@/stores/user-store';
 import { format } from 'date-fns';
 
 /**
@@ -20,25 +20,13 @@ import { format } from 'date-fns';
  */
 export default function DashboardPage() {
   const t = useTranslations('Dashboard');
-  const [userName, setUserName] = useState<string>('');
+  const { profile, fetchProfile } = useUserStore();
 
   useEffect(() => {
-    const fetchUser = async () => {
-      const supabase = createClient();
-      const { data: { user } } = await supabase.auth.getUser();
-      if (user) {
-        const { data: profile } = await supabase
-          .from('profiles')
-          .select('display_name')
-          .eq('id', user.id)
-          .single();
+    fetchProfile();
+  }, [fetchProfile]);
 
-        const effectiveName = profile?.display_name || user.user_metadata?.full_name || user.user_metadata?.name || user.email?.split('@')[0] || '';
-        setUserName(effectiveName);
-      }
-    };
-    fetchUser();
-  }, []);
+  const userName = profile?.displayName || '';
 
   const containerVariants = {
     hidden: { opacity: 0 },

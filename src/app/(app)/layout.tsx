@@ -4,6 +4,7 @@ import { useUIStore } from '@/stores/ui-store';
 import { Sidebar } from '@/components/layout/sidebar';
 import { MobileNav } from '@/components/layout/mobile-nav';
 import { Header } from '@/components/layout/header';
+import { CommandPalette } from '@/components/layout/command-palette';
 import { AICopilot } from '@/components/chat/ai-copilot';
 import { cn } from '@/lib/utils';
 import { useEffect, useState } from 'react';

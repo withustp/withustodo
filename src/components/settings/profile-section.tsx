@@ -22,6 +22,7 @@ import {
   KeyRound
 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
+import { useUserStore } from '@/stores/user-store';
 
 /**
  * Enterprise-grade User Profile & Account Management Hub
@@ -63,6 +64,18 @@ export function ProfileSection() {
 
         setName(effectiveName);
         setAvatarUrl(effectiveAvatar);
+
+        // Update global user store
+        useUserStore.getState().setProfile({
+          id: user.id,
+          email: user.email || '',
+          displayName: effectiveName,
+          avatarUrl: effectiveAvatar,
+          bio: user.user_metadata?.bio || '',
+          createdAt: user.created_at,
+          lastSignInAt: user.last_sign_in_at,
+          provider: user.app_metadata?.provider || 'google',
+        });
 
         if (user.created_at) {
           const date = new Date(user.created_at);
@@ -109,6 +122,13 @@ export function ProfileSection() {
         }
       });
 
+      // 3. Immediately synchronize global reactive Zustand store across Sidebar, Dashboard & Copilot
+      useUserStore.getState().setProfile({
+        displayName: name.trim(),
+        bio: bio,
+        avatarUrl: avatarUrl
+      });
+
       toast.success('프로필 표시 이름이 성공적으로 변경되었습니다!');
       router.refresh();
     } catch (err: any) {
@@ -128,6 +148,7 @@ export function ProfileSection() {
   };
 
   const handleLogout = async () => {
+    useUserStore.getState().clearProfile();
     await supabase.auth.signOut();
     toast.info('로그아웃되었습니다.');
     router.push('/login');

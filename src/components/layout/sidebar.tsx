@@ -17,8 +17,8 @@ import {
   ChevronRight,
   Sparkles,
 } from 'lucide-react';
-import { useEffect, useState } from 'react';
-import { createClient } from '@/lib/supabase/client';
+import { useEffect } from 'react';
+import { useUserStore } from '@/stores/user-store';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 
 const navItems = [
@@ -37,32 +37,15 @@ export function Sidebar() {
   const pathname = usePathname();
   const t = useTranslations('Navigation');
   const { isSidebarCollapsed, toggleSidebar } = useUIStore();
-  const [userName, setUserName] = useState('User');
-  const [userEmail, setUserEmail] = useState('');
-  const [avatarUrl, setAvatarUrl] = useState('');
-  const supabase = createClient();
+  const { profile, fetchProfile } = useUserStore();
 
   useEffect(() => {
-    const loadUser = async () => {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (user) {
-        setUserEmail(user.email || '');
+    fetchProfile();
+  }, [fetchProfile]);
 
-        const { data: profile } = await supabase
-          .from('profiles')
-          .select('display_name, avatar_url')
-          .eq('id', user.id)
-          .single();
-
-        const effectiveName = profile?.display_name || user.user_metadata?.full_name || user.user_metadata?.name || user.email?.split('@')[0] || 'User';
-        const effectiveAvatar = profile?.avatar_url || user.user_metadata?.avatar_url || user.user_metadata?.picture || '';
-
-        setUserName(effectiveName);
-        setAvatarUrl(effectiveAvatar);
-      }
-    };
-    loadUser();
-  }, [supabase]);
+  const userName = profile?.displayName || 'User';
+  const userEmail = profile?.email || '';
+  const avatarUrl = profile?.avatarUrl || '';
 
   const initials = userName ? userName.slice(0, 2).toUpperCase() : 'WU';
 
