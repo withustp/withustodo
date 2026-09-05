@@ -5,7 +5,7 @@ import { createClient } from '@/lib/supabase/client';
 import { Category } from '@/types';
 
 /**
- * Hook for category operations with authenticated user_id injection and realtime sync
+ * Hook for category operations with task counting, authenticated user_id injection, and realtime sync
  */
 export function useCategories() {
   const [categories, setCategories] = useState<Category[]>([]);
@@ -18,14 +18,35 @@ export function useCategories() {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) return;
 
-      const { data, error } = await supabase
+      // 1. Fetch categories
+      const { data: catData, error: catError } = await supabase
         .from('categories')
         .select('*')
         .eq('user_id', user.id)
         .order('sort_order', { ascending: true });
 
-      if (error) throw error;
-      setCategories((data as any) || []);
+      if (catError) throw catError;
+
+      // 2. Fetch tasks to compute live task_count
+      const { data: taskData } = await supabase
+        .from('tasks')
+        .select('category_id')
+        .eq('user_id', user.id)
+        .eq('is_deleted', false);
+
+      const taskCounts: Record<string, number> = {};
+      (taskData || []).forEach((t) => {
+        if (t.category_id) {
+          taskCounts[t.category_id] = (taskCounts[t.category_id] || 0) + 1;
+        }
+      });
+
+      const categoriesWithCount = (catData || []).map((cat) => ({
+        ...cat,
+        task_count: taskCounts[cat.id] || 0,
+      }));
+
+      setCategories(categoriesWithCount);
     } catch (err) {
       console.error('Failed to fetch categories:', err);
     } finally {
@@ -42,10 +63,10 @@ export function useCategories() {
     if (!user) throw new Error('로그인이 필요합니다.');
 
     const categoryWithUser = {
-      ...category,
-      user_id: user.id,
+      name: category.name,
       color: category.color || '#6366f1',
       icon: category.icon || 'Tag',
+      user_id: user.id,
       sort_order: category.sort_order ?? categories.length,
     };
 
@@ -56,7 +77,7 @@ export function useCategories() {
       .single();
 
     if (error) throw error;
-    setCategories((prev) => [...prev, data as any]);
+    setCategories((prev) => [...prev, { ...(data as any), task_count: 0 }]);
     return data;
   };
 
