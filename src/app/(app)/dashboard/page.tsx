@@ -27,7 +27,14 @@ export default function DashboardPage() {
       const supabase = createClient();
       const { data: { user } } = await supabase.auth.getUser();
       if (user) {
-        setUserName(user.user_metadata?.full_name || user.email?.split('@')[0] || '');
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('display_name')
+          .eq('id', user.id)
+          .single();
+
+        const effectiveName = profile?.display_name || user.user_metadata?.full_name || user.user_metadata?.name || user.email?.split('@')[0] || '';
+        setUserName(effectiveName);
       }
     };
     fetchUser();

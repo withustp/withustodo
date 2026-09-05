@@ -9,7 +9,6 @@ import { useState, useEffect } from 'react';
 import { Badge } from '@/components/ui/badge';
 import { createClient } from '@/lib/supabase/client';
 import { toast } from 'sonner';
-import { motion } from 'framer-motion';
 import { 
   User, 
   Mail, 
@@ -26,6 +25,7 @@ import { useRouter } from 'next/navigation';
 
 /**
  * Enterprise-grade User Profile & Account Management Hub
+ * Synchronizes display_name, bio, and avatar directly with Supabase profiles table
  */
 export function ProfileSection() {
   const t = useTranslations('Settings.Profile');
@@ -48,11 +48,22 @@ export function ProfileSection() {
       if (user) {
         setUserId(user.id);
         setEmail(user.email || '');
-        setName(user.user_metadata?.full_name || user.user_metadata?.name || user.email?.split('@')[0] || '');
-        setAvatarUrl(user.user_metadata?.avatar_url || user.user_metadata?.picture || '');
         setBio(user.user_metadata?.bio || 'WithUs Todo와 함께 스마트한 생산성 관리 중 🚀');
         setProvider(user.app_metadata?.provider || 'google');
         
+        // 1. Fetch live profile from profiles table first
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('display_name, avatar_url')
+          .eq('id', user.id)
+          .single();
+
+        const effectiveName = profile?.display_name || user.user_metadata?.full_name || user.user_metadata?.name || user.email?.split('@')[0] || '';
+        const effectiveAvatar = profile?.avatar_url || user.user_metadata?.avatar_url || user.user_metadata?.picture || '';
+
+        setName(effectiveName);
+        setAvatarUrl(effectiveAvatar);
+
         if (user.created_at) {
           const date = new Date(user.created_at);
           setCreatedAt(date.toLocaleDateString('ko-KR', { year: 'numeric', month: 'long', day: 'numeric' }));
@@ -67,28 +78,42 @@ export function ProfileSection() {
   }, [supabase]);
 
   const handleSave = async () => {
+    if (!name.trim()) {
+      toast.error('표시 이름을 입력해주세요.');
+      return;
+    }
     setIsSaving(true);
     try {
-      const { error } = await supabase.auth.updateUser({
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error('인증되지 않았습니다.');
+
+      // 1. Update Supabase profiles table directly
+      const { error: profileError } = await supabase
+        .from('profiles')
+        .update({
+          display_name: name.trim(),
+          avatar_url: avatarUrl,
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', user.id);
+
+      if (profileError) throw profileError;
+
+      // 2. Update Auth metadata
+      await supabase.auth.updateUser({
         data: { 
-          full_name: name,
+          full_name: name.trim(),
+          name: name.trim(),
           bio: bio,
           avatar_url: avatarUrl
         }
       });
-      if (error) throw error;
-      
-      // Update profiles table if row exists
-      if (userId) {
-        await supabase.from('profiles').update({
-          display_name: name,
-          avatar_url: avatarUrl
-        }).eq('id', userId);
-      }
 
-      toast.success('프로필 정보가 성공적으로 업데이트되었습니다.');
-    } catch {
-      toast.error('프로필 저장 중 오류가 발생했습니다.');
+      toast.success('프로필 표시 이름이 성공적으로 변경되었습니다!');
+      router.refresh();
+    } catch (err: any) {
+      console.error('Save profile error:', err);
+      toast.error('프로필 저장 중 오류가 발생했습니다: ' + (err.message || ''));
     } finally {
       setIsSaving(false);
     }

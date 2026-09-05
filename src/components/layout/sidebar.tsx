@@ -46,9 +46,19 @@ export function Sidebar() {
     const loadUser = async () => {
       const { data: { user } } = await supabase.auth.getUser();
       if (user) {
-        setUserName(user.user_metadata?.full_name || user.user_metadata?.name || user.email?.split('@')[0] || 'User');
         setUserEmail(user.email || '');
-        setAvatarUrl(user.user_metadata?.avatar_url || user.user_metadata?.picture || '');
+
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('display_name, avatar_url')
+          .eq('id', user.id)
+          .single();
+
+        const effectiveName = profile?.display_name || user.user_metadata?.full_name || user.user_metadata?.name || user.email?.split('@')[0] || 'User';
+        const effectiveAvatar = profile?.avatar_url || user.user_metadata?.avatar_url || user.user_metadata?.picture || '';
+
+        setUserName(effectiveName);
+        setAvatarUrl(effectiveAvatar);
       }
     };
     loadUser();
