@@ -2,27 +2,99 @@
 
 import { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Sparkles, X, Send, Bot, User, RefreshCw, MessageSquare, ChevronDown, Minimize2 } from 'lucide-react';
+import { 
+  Sparkles, 
+  X, 
+  Send, 
+  Bot, 
+  User, 
+  RefreshCw, 
+  CheckCircle2, 
+  Trash2, 
+  PlusCircle, 
+  Calendar,
+  Flame,
+  Clock
+} from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { cn } from '@/lib/utils';
+import { useTaskStore } from '@/stores/task-store';
+
+export interface ChatAction {
+  type: 'created' | 'updated' | 'deleted';
+  task?: any;
+  taskId?: string;
+  summary: string;
+}
 
 interface Message {
   id: string;
   role: 'user' | 'assistant';
   content: string;
+  actions?: ChatAction[];
 }
 
 const QUICK_PROMPTS = [
   '⚡ 나 오늘 뭐부터 해야 해?',
   '📅 이번 주 마감 일정 브리핑해줘',
+  '➕ "내일 15시까지 수학 과제" 등록해줘',
   '🎯 25분 뽀모도로로 집중할 작업 골라줘',
-  '💡 어떻게 공부 계획을 짜면 좋을까?',
+  '💡 3일 집중 시험 대비 공부 계획 짜줘',
 ];
 
 /**
- * AI Todo Copilot Floating Chatbot
- * Powered by gpt-4o-mini with real-time DB task context
+ * Renders formatted assistant markdown messages with highlighted bold text and bullets
+ */
+function FormattedMessage({ content }: { content: string }) {
+  const lines = content.split('\n');
+
+  return (
+    <div className="space-y-1 leading-relaxed">
+      {lines.map((line, idx) => {
+        if (!line.trim()) {
+          return <div key={idx} className="h-1.5" />;
+        }
+
+        // Process bold markdown **text**
+        const parts = line.split(/(\*\*.*?\*\*)/g);
+        const formattedLine = parts.map((part, pIdx) => {
+          if (part.startsWith('**') && part.endsWith('**')) {
+            return (
+              <strong key={pIdx} className="font-semibold text-primary/95 dark:text-cyan-300">
+                {part.slice(2, -2)}
+              </strong>
+            );
+          }
+          return part;
+        });
+
+        if (line.trim().startsWith('- ') || line.trim().startsWith('• ')) {
+          return (
+            <div key={idx} className="flex items-start gap-1.5 pl-1">
+              <span className="text-primary font-bold">•</span>
+              <span>{formattedLine}</span>
+            </div>
+          );
+        }
+
+        if (/^\d+\.\s/.test(line.trim())) {
+          return (
+            <div key={idx} className="flex items-start gap-1.5 pl-1">
+              <span>{formattedLine}</span>
+            </div>
+          );
+        }
+
+        return <p key={idx}>{formattedLine}</p>;
+      })}
+    </div>
+  );
+}
+
+/**
+ * Enterprise AI Todo Copilot Floating Chatbot
+ * Powered by gpt-4o-mini with real-time DB task context & Function Calling
  */
 export function AICopilot() {
   const [isOpen, setIsOpen] = useState(false);
@@ -30,7 +102,7 @@ export function AICopilot() {
     {
       id: 'welcome',
       role: 'assistant',
-      content: '안녕하세요! **WithUs AI 코파일럿**입니다. 🤖✨\n\n현재 등록된 과제와 마감 일정을 모두 파악하고 있어요.\n**"오늘 뭐해야 해?"** 또는 원하는 질문을 자유롭게 물어보세요!',
+      content: '안녕하세요! **WithUs AI 코파일럿**입니다. 🤖✨\n\n현재 등록된 모든 과제와 일정을 파악하고 있으며, 말씀만 해주시면 **할 일 추가/완료/삭제**까지 실시간으로 처리해 드립니다.\n\n**"오늘 뭐부터 할까?"** 또는 **"내일 3시까지 과학 숙제 등록해줘"** 처럼 편하게 말씀해보세요!',
     }
   ]);
   const [input, setInput] = useState('');
@@ -74,10 +146,27 @@ export function AICopilot() {
       });
 
       const data = await response.json();
+      const actions: ChatAction[] = data.actions || [];
+
+      // Optimistically synchronize Zustand task store across views (List, Kanban, Calendar, Dashboard)
+      if (actions.length > 0) {
+        actions.forEach((act) => {
+          if (act.type === 'created' && act.task) {
+            useTaskStore.getState().addTask(act.task);
+          } else if (act.type === 'updated' && (act.taskId || act.task?.id)) {
+            const tId = act.taskId || act.task.id;
+            useTaskStore.getState().updateTask(tId, act.task || { status: 'done' });
+          } else if (act.type === 'deleted' && act.taskId) {
+            useTaskStore.getState().deleteTask(act.taskId);
+          }
+        });
+      }
+
       const assistantMessage: Message = {
         id: (Date.now() + 1).toString(),
         role: 'assistant',
         content: data.content || '응답을 받지 못했습니다.',
+        actions: actions,
       };
 
       setMessages((prev) => [...prev, assistantMessage]);
@@ -136,7 +225,7 @@ export function AICopilot() {
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 20, scale: 0.95 }}
             transition={{ duration: 0.2 }}
-            className="fixed bottom-6 right-4 sm:right-6 z-50 w-[92vw] sm:w-[420px] h-[580px] max-h-[85vh] rounded-3xl border border-white/15 dark:border-white/10 bg-card/95 backdrop-blur-3xl shadow-[0_25px_60px_-15px_rgba(0,0,0,0.8)] flex flex-col overflow-hidden"
+            className="fixed bottom-6 right-4 sm:right-6 z-50 w-[92vw] sm:w-[430px] h-[590px] max-h-[86vh] rounded-3xl border border-white/15 dark:border-white/10 bg-card/95 backdrop-blur-3xl shadow-[0_25px_60px_-15px_rgba(0,0,0,0.8)] flex flex-col overflow-hidden"
           >
             {/* Header */}
             <div className="flex items-center justify-between px-5 py-4 border-b border-border/60 bg-background/50">
@@ -203,13 +292,44 @@ export function AICopilot() {
 
                     <div
                       className={cn(
-                        "max-w-[82%] px-3.5 py-2.5 rounded-2xl leading-relaxed whitespace-pre-wrap shadow-sm",
+                        "max-w-[85%] px-3.5 py-2.5 rounded-2xl leading-relaxed shadow-sm flex flex-col gap-2",
                         isUser
-                          ? "bg-primary text-primary-foreground rounded-tr-none font-medium"
-                          : "bg-background/80 border border-border/60 text-foreground rounded-tl-none font-normal"
+                          ? "bg-primary text-primary-foreground rounded-tr-none font-medium whitespace-pre-wrap"
+                          : "bg-background/85 border border-border/70 text-foreground rounded-tl-none font-normal"
                       )}
                     >
-                      {m.content}
+                      {isUser ? (
+                        m.content
+                      ) : (
+                        <FormattedMessage content={m.content} />
+                      )}
+
+                      {/* Render Interactive Action Badges */}
+                      {m.actions && m.actions.length > 0 && (
+                        <div className="mt-1 pt-2 border-t border-border/50 space-y-1.5">
+                          {m.actions.map((act, i) => (
+                            <motion.div
+                              key={i}
+                              initial={{ opacity: 0, scale: 0.95 }}
+                              animate={{ opacity: 1, scale: 1 }}
+                              className="flex items-center gap-2 px-2.5 py-1.5 rounded-xl bg-primary/10 border border-primary/20 text-[11px] text-foreground shadow-xs"
+                            >
+                              {act.type === 'created' && (
+                                <CheckCircle2 className="w-3.5 h-3.5 text-emerald-500 shrink-0 animate-bounce" />
+                              )}
+                              {act.type === 'updated' && (
+                                <Sparkles className="w-3.5 h-3.5 text-indigo-400 shrink-0 animate-pulse" />
+                              )}
+                              {act.type === 'deleted' && (
+                                <Trash2 className="w-3.5 h-3.5 text-rose-500 shrink-0" />
+                              )}
+                              <span className="font-semibold text-primary dark:text-cyan-300 truncate">
+                                {act.summary}
+                              </span>
+                            </motion.div>
+                          ))}
+                        </div>
+                      )}
                     </div>
                   </motion.div>
                 );
