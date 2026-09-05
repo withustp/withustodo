@@ -28,7 +28,9 @@ export function useTasks(filter?: TaskFilter) {
         if (filter.search) query = query.ilike('title', `%${filter.search}%`);
       }
 
-      const { data, error } = await query.order('sort_order', { ascending: true });
+      const { data, error } = await query
+        .order('due_date', { ascending: true, nullsFirst: false })
+        .order('created_at', { ascending: true });
       if (error) throw error;
       setTasks((data as any) || []);
     } catch (err: any) {

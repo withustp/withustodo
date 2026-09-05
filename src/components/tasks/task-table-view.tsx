@@ -20,6 +20,13 @@ export function TaskTableView() {
     return <div className="p-4 text-muted-foreground">{t('loading')}</div>;
   }
 
+  const sortedTasks = [...tasks].sort((a, b) => {
+    if (!a.due_date && !b.due_date) return 0;
+    if (!a.due_date) return 1;
+    if (!b.due_date) return -1;
+    return new Date(a.due_date).getTime() - new Date(b.due_date).getTime();
+  });
+
   return (
     <div className="h-full overflow-auto bg-card rounded-lg border border-border">
       <table className="w-full text-left border-collapse">
@@ -34,7 +41,7 @@ export function TaskTableView() {
           </tr>
         </thead>
         <tbody>
-          {tasks.map(task => {
+          {sortedTasks.map(task => {
             const isSelected = selectedTaskIds.includes(task.id);
             return (
               <tr 

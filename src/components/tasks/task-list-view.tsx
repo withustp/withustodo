@@ -21,9 +21,16 @@ export function TaskListView() {
     return <div className="p-8 text-center text-muted-foreground">{t('noTasks')}</div>;
   }
 
-  const todoTasks = tasks.filter(t => t.status === 'todo');
-  const inProgressTasks = tasks.filter(t => t.status === 'in_progress');
-  const doneTasks = tasks.filter(t => t.status === 'done');
+  const sortedTasks = [...tasks].sort((a, b) => {
+    if (!a.due_date && !b.due_date) return 0;
+    if (!a.due_date) return 1;
+    if (!b.due_date) return -1;
+    return new Date(a.due_date).getTime() - new Date(b.due_date).getTime();
+  });
+
+  const todoTasks = sortedTasks.filter(t => t.status === 'todo');
+  const inProgressTasks = sortedTasks.filter(t => t.status === 'in_progress');
+  const doneTasks = sortedTasks.filter(t => t.status === 'done');
 
   return (
     <div className="h-full overflow-y-auto pr-2">

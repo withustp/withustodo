@@ -19,10 +19,17 @@ export function TaskKanbanView() {
 
   const columns = ['todo', 'in_progress', 'done'] as const;
 
+  const sortedTasks = [...tasks].sort((a, b) => {
+    if (!a.due_date && !b.due_date) return 0;
+    if (!a.due_date) return 1;
+    if (!b.due_date) return -1;
+    return new Date(a.due_date).getTime() - new Date(b.due_date).getTime();
+  });
+
   return (
     <div className="flex h-full gap-4 overflow-x-auto pb-4">
       {columns.map(status => {
-        const columnTasks = tasks.filter(task => task.status === status);
+        const columnTasks = sortedTasks.filter(task => task.status === status);
         return (
           <div key={status} className="flex flex-col flex-1 min-w-[300px] bg-muted/20 rounded-xl p-4">
             <h3 className="font-semibold text-foreground mb-4 capitalize flex items-center justify-between">
