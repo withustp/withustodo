@@ -296,24 +296,33 @@ export function TaskDetailPanel() {
 
                         {/* Interval */}
                         <div className="space-y-1">
-                          <span className="text-[11px] text-muted-foreground">간격</span>
-                          <div className="flex items-center gap-1">
-                            <Input
-                              type="number"
-                              min={1}
-                              max={99}
-                              value={interval}
-                              onChange={(e) => {
-                                const nextInt = Math.max(1, parseInt(e.target.value) || 1);
-                                setInterval(nextInt);
-                                saveRecurrence(isRecurring, recurringType, nextInt, daysOfWeek, hasEndDate, endDate);
-                              }}
-                              className="h-8 text-xs text-center bg-background"
-                            />
-                            <span className="text-xs text-muted-foreground shrink-0">
-                              {recurringType === 'daily' ? '일마다' : recurringType === 'weekly' ? '주마다' : '개월마다'}
-                            </span>
-                          </div>
+                          <span className="text-[11px] text-muted-foreground">반복 간격</span>
+                          <Select
+                            value={String(interval)}
+                            onValueChange={(val: string) => {
+                              const nextInt = parseInt(val) || 1;
+                              setInterval(nextInt);
+                              saveRecurrence(isRecurring, recurringType, nextInt, daysOfWeek, hasEndDate, endDate);
+                            }}
+                          >
+                            <SelectTrigger className="h-8 text-xs bg-background">
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="1">
+                                {recurringType === 'daily' ? '매일 (1일마다)' : recurringType === 'weekly' ? '매주 (1주마다)' : '매월 (1개월마다)'}
+                              </SelectItem>
+                              <SelectItem value="2">
+                                {recurringType === 'daily' ? '2일마다' : recurringType === 'weekly' ? '2주마다' : '2개월마다'}
+                              </SelectItem>
+                              <SelectItem value="3">
+                                {recurringType === 'daily' ? '3일마다' : recurringType === 'weekly' ? '3주마다' : '3개월마다'}
+                              </SelectItem>
+                              <SelectItem value="4">
+                                {recurringType === 'daily' ? '4일마다' : recurringType === 'weekly' ? '4주마다' : '4개월마다'}
+                              </SelectItem>
+                            </SelectContent>
+                          </Select>
                         </div>
                       </div>
 

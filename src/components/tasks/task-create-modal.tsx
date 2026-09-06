@@ -264,19 +264,28 @@ export function TaskCreateModal() {
 
                     <div className="space-y-1">
                       <span className="text-[11px] text-zinc-400">반복 간격</span>
-                      <div className="flex items-center gap-1.5">
-                        <Input
-                          type="number"
-                          min={1}
-                          max={99}
-                          value={interval}
-                          onChange={(e) => setInterval(Math.max(1, parseInt(e.target.value) || 1))}
-                          className="h-8 bg-white/[0.04] border-white/10 text-xs text-center"
-                        />
-                        <span className="text-xs text-zinc-400 shrink-0">
-                          {recurringType === 'daily' ? '일마다' : recurringType === 'weekly' ? '주마다' : '개월마다'}
-                        </span>
-                      </div>
+                      <Select
+                        value={String(interval)}
+                        onValueChange={(val: string) => setInterval(parseInt(val) || 1)}
+                      >
+                        <SelectTrigger className="w-full h-8 bg-white/[0.04] border-white/10 text-xs">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent className="bg-[#12141C] border-white/10">
+                          <SelectItem value="1">
+                            {recurringType === 'daily' ? '매일 (1일마다)' : recurringType === 'weekly' ? '매주 (1주마다)' : '매월 (1개월마다)'}
+                          </SelectItem>
+                          <SelectItem value="2">
+                            {recurringType === 'daily' ? '2일마다' : recurringType === 'weekly' ? '2주마다' : '2개월마다'}
+                          </SelectItem>
+                          <SelectItem value="3">
+                            {recurringType === 'daily' ? '3일마다' : recurringType === 'weekly' ? '3주마다' : '3개월마다'}
+                          </SelectItem>
+                          <SelectItem value="4">
+                            {recurringType === 'daily' ? '4일마다' : recurringType === 'weekly' ? '4주마다' : '4개월마다'}
+                          </SelectItem>
+                        </SelectContent>
+                      </Select>
                     </div>
                   </div>
 
