@@ -7,13 +7,17 @@ import {
   setDate,
   getDaysInMonth,
   isAfter,
+  isBefore,
   endOfDay,
   startOfDay,
   format,
   parseISO,
-  isValid
+  isValid,
+  differenceInCalendarDays,
+  differenceInCalendarWeeks,
+  differenceInCalendarMonths
 } from 'date-fns';
-import { RecurringPattern } from '@/types';
+import { RecurringPattern, Task } from '@/types';
 
 /**
  * Calculates the next due date for a recurring task based on its pattern and current due date.
@@ -213,4 +217,91 @@ export function attachRecurrenceToDescription(
   const serialized = JSON.stringify(pattern);
   return base ? `${base}\n\n<!-- recurring: ${serialized} -->` : `<!-- recurring: ${serialized} -->`;
 }
+
+/**
+ * Determines if a task is scheduled on a specific target calendar date.
+ * For non-recurring tasks, checks if task.due_date matches targetDate.
+ * For recurring tasks:
+ * - If task is already completed (status === 'done'), it only appears on its original due date.
+ * - If active, projects occurrences according to daily, weekly, or monthly recurrence rules.
+ *
+ * @param task - The task entity
+ * @param targetDate - The calendar day to check
+ * @returns boolean indicating whether task falls on this date
+ */
+export function isTaskScheduledOnDate(task: Task, targetDate: Date): boolean {
+  if (task.is_deleted) return false;
+  if (!task.due_date && !task.is_recurring) return false;
+
+  const baseDate = task.due_date ? parseISO(task.due_date) : parseISO(task.created_at);
+  if (!isValid(baseDate)) return false;
+
+  const targetDayStr = format(targetDate, 'yyyy-MM-dd');
+  const baseDayStr = format(baseDate, 'yyyy-MM-dd');
+
+  // Exact due date always matches
+  if (targetDayStr === baseDayStr) return true;
+
+  // Non-recurring or completed tasks do not project into the future
+  if (!task.is_recurring || !task.recurring_pattern || task.status === 'done') {
+    return false;
+  }
+
+  // Cannot project to dates before the task's start due date
+  if (isBefore(startOfDay(targetDate), startOfDay(baseDate))) {
+    return false;
+  }
+
+  const pattern = task.recurring_pattern;
+
+  // Enforce end_date cutoff if set
+  if (pattern.end_date) {
+    const parsedEnd = typeof pattern.end_date === 'string' ? parseISO(pattern.end_date) : new Date(pattern.end_date);
+    if (isValid(parsedEnd)) {
+      if (isAfter(startOfDay(targetDate), endOfDay(parsedEnd))) {
+        return false;
+      }
+    }
+  }
+
+  const interval = Math.max(1, pattern.interval || 1);
+
+  switch (pattern.type) {
+    case 'daily': {
+      const diffDays = differenceInCalendarDays(targetDate, baseDate);
+      return diffDays >= 0 && diffDays % interval === 0;
+    }
+
+    case 'weekly': {
+      const targetDayOfWeek = getDay(targetDate);
+      const targetDays = (pattern.days_of_week && pattern.days_of_week.length > 0)
+        ? pattern.days_of_week
+        : [getDay(baseDate)];
+
+      if (!targetDays.includes(targetDayOfWeek)) {
+        return false;
+      }
+
+      const diffWeeks = differenceInCalendarWeeks(targetDate, baseDate, { weekStartsOn: 0 });
+      return diffWeeks >= 0 && diffWeeks % interval === 0;
+    }
+
+    case 'monthly': {
+      const targetDayOfMonth = pattern.day_of_month || getDate(baseDate);
+      const maxDaysInTargetMonth = getDaysInMonth(targetDate);
+      const clampedDay = Math.min(targetDayOfMonth, maxDaysInTargetMonth);
+
+      if (getDate(targetDate) !== clampedDay) {
+        return false;
+      }
+
+      const diffMonths = differenceInCalendarMonths(targetDate, baseDate);
+      return diffMonths >= 0 && diffMonths % interval === 0;
+    }
+
+    default:
+      return false;
+  }
+}
+
 

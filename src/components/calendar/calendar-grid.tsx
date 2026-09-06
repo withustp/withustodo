@@ -6,6 +6,7 @@ import { cn } from '@/lib/utils';
 import { useState } from 'react';
 import { DayDetail } from './day-detail';
 import { useTasks } from '@/hooks/use-tasks';
+import { isTaskScheduledOnDate } from '@/lib/recurrence';
 
 interface CalendarGridProps {
   currentDate: Date;
@@ -14,7 +15,7 @@ interface CalendarGridProps {
 
 /**
  * Calendar Grid
- * Renders the days of the month with real task due dates
+ * Renders the days of the month with real task due dates and recurring task projections
  */
 export function CalendarGrid({ currentDate }: CalendarGridProps) {
   const t = useTranslations('Calendar.Grid');
@@ -29,14 +30,11 @@ export function CalendarGrid({ currentDate }: CalendarGridProps) {
   const days = eachDayOfInterval({ start: startDate, end: endDate });
   const weekDays = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 
-  // Map real tasks by their due_date (YYYY-MM-DD)
+  // Map real tasks and projected recurring occurrences by calendar date (YYYY-MM-DD)
   const taskMap: Record<string, typeof tasks> = {};
-  tasks.forEach((task) => {
-    if (task.due_date && !task.is_deleted) {
-      const d = format(new Date(task.due_date), 'yyyy-MM-dd');
-      if (!taskMap[d]) taskMap[d] = [];
-      taskMap[d].push(task);
-    }
+  days.forEach((day) => {
+    const d = format(day, 'yyyy-MM-dd');
+    taskMap[d] = tasks.filter((task) => isTaskScheduledOnDate(task, day));
   });
 
   return (

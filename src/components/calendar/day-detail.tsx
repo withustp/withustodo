@@ -6,7 +6,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import { Badge } from '@/components/ui/badge';
 import { CheckCircle2, Circle, Repeat } from 'lucide-react';
 import { useTasks } from '@/hooks/use-tasks';
-import { formatRecurrenceSummary } from '@/lib/recurrence';
+import { formatRecurrenceSummary, isTaskScheduledOnDate } from '@/lib/recurrence';
 
 interface DayDetailProps {
   date: Date;
@@ -15,17 +15,13 @@ interface DayDetailProps {
 
 /**
  * Day Detail
- * Modal showing tasks for a specific date from real store
+ * Modal showing tasks and recurring occurrences for a specific date
  */
 export function DayDetail({ date, onClose }: DayDetailProps) {
   const t = useTranslations('Calendar.DayDetail');
   const { tasks, toggleStatus } = useTasks();
-  const dateStr = format(date, 'yyyy-MM-dd');
 
-  const dayTasks = tasks.filter((task) => {
-    if (!task.due_date || task.is_deleted) return false;
-    return format(new Date(task.due_date), 'yyyy-MM-dd') === dateStr;
-  });
+  const dayTasks = tasks.filter((task) => isTaskScheduledOnDate(task, date));
 
   return (
     <Dialog open onOpenChange={onClose}>
