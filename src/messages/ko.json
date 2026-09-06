@@ -181,6 +181,8 @@
     "delete": "삭제",
     "cancel": "취소",
     "save": "저장",
+    "dropHere": "여기에 놓아주세요",
+    "emptyColumn": "할 일을 여기로 드래그하세요",
     "status": {
       "todo": "진행 전",
       "in_progress": "진행 중",

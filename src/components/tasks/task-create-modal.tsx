@@ -98,7 +98,7 @@ export function TaskCreateModal() {
                 <Flag size={12} className="text-zinc-500" />
                 {tTasks('priority')}
               </label>
-              <Select value={priority} onValueChange={(val: Priority) => setPriority(val)}>
+              <Select value={priority} onValueChange={(val: string) => setPriority(val as Priority)}>
                 <SelectTrigger className="w-full h-9 bg-white/[0.03] border-white/10 text-xs">
                   <SelectValue />
                 </SelectTrigger>

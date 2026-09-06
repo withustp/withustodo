@@ -10,14 +10,21 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Badge } from '@/components/ui/badge';
 import { format } from 'date-fns';
 
-interface TaskCardProps {
+export interface TaskCardProps {
   task: Task;
+  isDragging?: boolean;
+  isOverlay?: boolean;
+  attributes?: Record<string, any>;
+  listeners?: Record<string, any>;
 }
 
 /**
- * Task card component with high-contrast glowing status circle and rich category pills
+ * Task card component with high-contrast glowing status circle and rich category pills.
+ * Enables dragging across the entire card surface while isolating child button interactions.
+ *
+ * @param props - TaskCardProps containing task data and dnd-kit attributes/listeners
  */
-export function TaskCard({ task }: TaskCardProps) {
+export function TaskCard({ task, isDragging, isOverlay, attributes, listeners }: TaskCardProps) {
   const { selectedTaskIds, toggleTaskSelection, openDetailPanel } = useTaskStore();
   const { toggleStatus } = useTasks();
   const isSelected = selectedTaskIds.includes(task.id);
@@ -33,20 +40,32 @@ export function TaskCard({ task }: TaskCardProps) {
     toggleTaskSelection(task.id);
   };
 
+  const handleClick = () => {
+    // Suppress opening detail panel if card is currently actively dragging or an overlay
+    if (isDragging || isOverlay) return;
+    openDetailPanel(task.id);
+  };
+
   const isOverdue = task.due_date && !isDone && new Date(task.due_date) < new Date();
 
   return (
     <motion.div
-      layout
-      onClick={() => openDetailPanel(task.id)}
+      layout={!isOverlay}
+      onClick={handleClick}
+      {...attributes}
+      {...listeners}
       className={cn(
-        "group relative flex items-center p-3.5 mb-2.5 rounded-xl border transition-all cursor-pointer",
-        isSelected
-          ? "border-primary bg-primary/10 ring-1 ring-primary/40 shadow-md"
-          : "border-border/70 bg-card/70 hover:border-primary/40 hover:bg-muted/40 shadow-sm",
-        isDone && "opacity-60 bg-muted/20"
+        "group relative flex items-center p-3.5 mb-2.5 rounded-xl border select-none transition-all",
+        isOverlay
+          ? "border-primary bg-card/95 backdrop-blur-xl shadow-2xl shadow-primary/30 ring-2 ring-primary/40 cursor-grabbing z-50"
+          : isDragging
+          ? "border-dashed border-primary/40 bg-primary/5 opacity-30 shadow-inner cursor-grabbing"
+          : isSelected
+          ? "border-primary bg-primary/10 ring-1 ring-primary/40 shadow-md cursor-grab active:cursor-grabbing"
+          : "border-border/70 bg-card/70 hover:border-primary/40 hover:bg-muted/40 shadow-sm cursor-grab active:cursor-grabbing",
+        isDone && !isOverlay && "opacity-60 bg-muted/20"
       )}
-      whileHover={{ scale: 1.008 }}
+      whileHover={isOverlay ? undefined : { scale: 1.008 }}
       transition={{ duration: 0.15 }}
     >
       {/* Priority Color Bar on Left */}
@@ -60,25 +79,30 @@ export function TaskCard({ task }: TaskCardProps) {
         )}
       />
 
-      {/* Drag Grip handle */}
-      <div className="flex items-center opacity-0 group-hover:opacity-100 transition-opacity cursor-grab pl-1 pr-1.5 text-muted-foreground">
+      {/* Drag Grip visual handle */}
+      <div 
+        className="flex items-center opacity-40 group-hover:opacity-100 transition-opacity cursor-grab active:cursor-grabbing pl-0.5 pr-1.5 text-muted-foreground"
+        title="드래그하여 이동"
+      >
         <GripVertical className="w-3.5 h-3.5" />
       </div>
 
-      {/* Selection Checkbox (visible on hover or when selected) */}
+      {/* Selection Checkbox (stops pointer down to prevent accidental drag) */}
       <div 
         className={cn(
-          "pr-2.5 transition-opacity",
+          "pr-2.5 transition-opacity cursor-pointer",
           isSelected ? "opacity-100" : "opacity-40 group-hover:opacity-100"
         )} 
+        onPointerDown={(e) => e.stopPropagation()}
         onClick={handleSelect}
       >
         <Checkbox checked={isSelected} className="border-border/80 data-[state=checked]:bg-primary data-[state=checked]:border-primary" />
       </div>
 
-      {/* Crisp Glowing Status Circle Toggle */}
+      {/* Crisp Glowing Status Circle Toggle (stops pointer down to prevent accidental drag) */}
       <button 
         type="button"
+        onPointerDown={(e) => e.stopPropagation()}
         onClick={handleToggleStatus}
         className={cn(
           "w-5 h-5 rounded-full border-2 flex items-center justify-center cursor-pointer mr-3 transition-all shrink-0",

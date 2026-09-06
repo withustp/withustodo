@@ -253,7 +253,9 @@ export function ProfileSection() {
                 disabled 
                 className="bg-muted/40 text-muted-foreground pr-8 cursor-not-allowed"
               />
-              <ShieldCheck className="w-4 h-4 text-emerald-500 absolute right-3 top-1/2 -translate-y-1/2" title="인증된 계정" />
+              <span title="인증된 계정" className="absolute right-3 top-1/2 -translate-y-1/2 flex items-center">
+                <ShieldCheck className="w-4 h-4 text-emerald-500" />
+              </span>
             </div>
           </div>
 
