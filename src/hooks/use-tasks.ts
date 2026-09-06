@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useCallback, useId } from 'react';
+import { useState, useEffect, useCallback, useId, useMemo } from 'react';
 import { createClient } from '@/lib/supabase/client';
 import { Task, TaskFilter } from '@/types';
 import { useTaskStore } from '@/stores/task-store';
@@ -11,14 +11,15 @@ import {
 } from '@/lib/recurrence';
 
 /**
- * Hook for task operations with safe real-time updates and Zustand cache.
+ * Hook for task operations with safe real-time updates, Zustand global cache,
+ * and reactive client-side filtering by category, status, priority, and search.
  */
 export function useTasks(filter?: TaskFilter) {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
   const supabase = createClient();
   const hookId = useId().replace(/:/g, '');
-  const { tasks, setTasks, addTask, updateTask: updateTaskInStore, deleteTask: deleteTaskFromStore } = useTaskStore();
+  const { tasks: allTasks, setTasks, addTask, updateTask: updateTaskInStore, deleteTask: deleteTaskFromStore } = useTaskStore();
 
   const fetchTasks = useCallback(async () => {
     setIsLoading(true);
@@ -31,22 +32,15 @@ export function useTasks(filter?: TaskFilter) {
         return;
       }
 
-      let query = supabase
+      // Always fetch full task collection so category counts and global views stay consistent
+      const { data, error } = await supabase
         .from('tasks')
         .select('*, category:categories(*)')
         .eq('user_id', user.id)
-        .eq('is_deleted', false);
-      
-      if (filter) {
-        if (filter.status && filter.status.length > 0) query = query.in('status', filter.status);
-        if (filter.priority && filter.priority.length > 0) query = query.in('priority', filter.priority);
-        if (filter.category_id) query = query.eq('category_id', filter.category_id);
-        if (filter.search) query = query.ilike('title', `%${filter.search}%`);
-      }
-
-      const { data, error } = await query
+        .eq('is_deleted', false)
         .order('due_date', { ascending: true, nullsFirst: false })
         .order('created_at', { ascending: true });
+
       if (error) throw error;
 
       const formattedTasks: Task[] = ((data as any[]) || []).map((t) => {
@@ -64,7 +58,7 @@ export function useTasks(filter?: TaskFilter) {
     } finally {
       setIsLoading(false);
     }
-  }, [filter, supabase, setTasks]);
+  }, [supabase, setTasks]);
 
   useEffect(() => {
     fetchTasks();
@@ -83,6 +77,20 @@ export function useTasks(filter?: TaskFilter) {
       supabase.removeChannel(channel);
     };
   }, [fetchTasks, hookId, supabase]);
+
+  // Reactive client-side filtering: instant feedback with zero network latency or state collisions
+  const filteredTasks = useMemo(() => {
+    if (!filter || Object.keys(filter).length === 0) return allTasks;
+
+    return allTasks.filter((task) => {
+      if (task.is_deleted) return false;
+      if (filter.category_id && task.category_id !== filter.category_id) return false;
+      if (filter.status && filter.status.length > 0 && !filter.status.includes(task.status)) return false;
+      if (filter.priority && filter.priority.length > 0 && !filter.priority.includes(task.priority)) return false;
+      if (filter.search && !task.title.toLowerCase().includes(filter.search.toLowerCase())) return false;
+      return true;
+    });
+  }, [allTasks, filter]);
 
   const createTask = async (task: Partial<Task>) => {
     try {
@@ -133,7 +141,7 @@ export function useTasks(filter?: TaskFilter) {
     try {
       const { data: { user } } = await supabase.auth.getUser();
       const { recurring_pattern, category, subtasks, labels, attachments, ...dbUpdates } = updates as any;
-      const existingTask = tasks.find((t) => t.id === id);
+      const existingTask = allTasks.find((t) => t.id === id);
 
       if (
         updates.recurring_pattern !== undefined ||
@@ -187,7 +195,7 @@ export function useTasks(filter?: TaskFilter) {
   const toggleStatus = async (id: string, currentStatus: Task['status']) => {
     const newStatus = currentStatus === 'done' ? 'todo' : 'done';
     const completedAt = newStatus === 'done' ? new Date().toISOString() : null;
-    const existingTask = tasks.find((t) => t.id === id);
+    const existingTask = allTasks.find((t) => t.id === id);
 
     await updateTask(id, {
       status: newStatus,
@@ -231,7 +239,8 @@ export function useTasks(filter?: TaskFilter) {
   };
 
   return {
-    tasks,
+    tasks: filteredTasks,
+    allTasks,
     isLoading,
     error,
     createTask,

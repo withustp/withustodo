@@ -56,7 +56,16 @@ export const useTaskStore = create<TaskState>((set) => ({
   })),
   clearSelection: () => set({ selectedTaskIds: [] }),
   setViewMode: (viewMode) => set({ viewMode }),
-  setFilters: (filters) => set((state) => ({ filters: { ...state.filters, ...filters } })),
+  setFilters: (newFilters) => set((state) => {
+    const updated = { ...state.filters, ...newFilters };
+    Object.keys(newFilters).forEach((key) => {
+      const val = (newFilters as any)[key];
+      if (val === undefined || val === null || val === '') {
+        delete (updated as any)[key];
+      }
+    });
+    return { filters: updated };
+  }),
   clearFilters: () => set({ filters: {} }),
   openCreateModal: () => set({ isCreateModalOpen: true }),
   closeCreateModal: () => set({ isCreateModalOpen: false }),
