@@ -4,8 +4,9 @@ import { useTranslations } from 'next-intl';
 import { format } from 'date-fns';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Badge } from '@/components/ui/badge';
-import { CheckCircle2, Circle } from 'lucide-react';
+import { CheckCircle2, Circle, Repeat } from 'lucide-react';
 import { useTasks } from '@/hooks/use-tasks';
+import { formatRecurrenceSummary } from '@/lib/recurrence';
 
 interface DayDetailProps {
   date: Date;
@@ -58,6 +59,12 @@ export function DayDetail({ date, onClose }: DayDetailProps) {
                       />
                       <span className="text-xs text-muted-foreground truncate">{task.category?.name || '미분류'}</span>
                     </div>
+                    {task.is_recurring && (
+                      <span className="inline-flex items-center gap-1 text-[10px] text-indigo-400 font-medium">
+                        <Repeat size={10} />
+                        {task.recurring_pattern ? formatRecurrenceSummary(task.recurring_pattern, 'ko') : '반복'}
+                      </span>
+                    )}
                   </div>
                 </div>
                 <Badge variant={task.priority === 'high' ? 'destructive' : 'secondary'} className="text-[10px] shrink-0">

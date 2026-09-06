@@ -6,7 +6,9 @@ import { useTranslations } from 'next-intl';
 import { format } from 'date-fns';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Badge } from '@/components/ui/badge';
+import { Repeat } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { formatRecurrenceSummary } from '@/lib/recurrence';
 
 /**
  * Task table view component
@@ -56,7 +58,18 @@ export function TaskTableView() {
                   <Checkbox checked={isSelected} />
                 </td>
                 <td className={cn("p-3 text-sm text-foreground", task.status === 'done' && "line-through text-muted-foreground")}>
-                  {task.title}
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <span>{task.title}</span>
+                    {task.is_recurring && (
+                      <span
+                        className="inline-flex items-center gap-1 text-[10px] font-medium px-1.5 py-0.5 rounded border border-indigo-500/30 bg-indigo-500/10 text-indigo-400 shrink-0"
+                        title={task.recurring_pattern ? formatRecurrenceSummary(task.recurring_pattern, 'ko') : '반복 일정'}
+                      >
+                        <Repeat size={10} />
+                        {task.recurring_pattern ? formatRecurrenceSummary(task.recurring_pattern, 'ko') : '반복'}
+                      </span>
+                    )}
+                  </div>
                 </td>
                 <td className="p-3">
                   <Badge variant="outline" className="capitalize text-xs">

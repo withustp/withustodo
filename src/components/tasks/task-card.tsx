@@ -4,11 +4,12 @@ import { motion } from 'framer-motion';
 import { Task } from '@/types';
 import { useTaskStore } from '@/stores/task-store';
 import { useTasks } from '@/hooks/use-tasks';
-import { GripVertical, Paperclip, Check, Calendar as CalendarIcon, AlertCircle } from 'lucide-react';
+import { GripVertical, Paperclip, Check, Calendar as CalendarIcon, AlertCircle, Repeat } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Badge } from '@/components/ui/badge';
 import { format } from 'date-fns';
+import { formatRecurrenceSummary } from '@/lib/recurrence';
 
 export interface TaskCardProps {
   task: Task;
@@ -165,6 +166,19 @@ export function TaskCard({ task, isDragging, isOverlay, attributes, listeners }:
               {isOverdue ? <AlertCircle size={11} /> : <CalendarIcon size={11} />}
               {format(new Date(task.due_date), 'MMM d')}
               {isOverdue && ' (기한 초과)'}
+            </span>
+          )}
+
+          {/* Recurring Schedule Badge */}
+          {task.is_recurring && (
+            <span
+              className="inline-flex items-center gap-1 text-[10px] font-medium px-1.5 py-0.5 rounded border border-indigo-500/30 bg-indigo-500/10 text-indigo-400"
+              title={task.recurring_pattern ? formatRecurrenceSummary(task.recurring_pattern, 'ko') : '반복 일정'}
+            >
+              <Repeat size={10} className="stroke-[2.5]" />
+              {task.recurring_pattern
+                ? formatRecurrenceSummary(task.recurring_pattern, 'ko')
+                : '반복'}
             </span>
           )}
 
