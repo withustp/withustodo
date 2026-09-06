@@ -170,3 +170,47 @@ export function formatRecurrenceSummary(
 
   return summary;
 }
+
+const RECURRING_METADATA_REGEX = /<!--\s*recurring:\s*(\{[\s\S]*?\})\s*-->/;
+
+/**
+ * Extracts embedded recurrence pattern metadata from task description if present.
+ *
+ * @param description - Raw task description string
+ * @returns Cleaned description and extracted RecurringPattern
+ */
+export function extractRecurrenceFromDescription(description: string | null | undefined): {
+  cleanDescription: string | null;
+  pattern: RecurringPattern | null;
+} {
+  if (!description) return { cleanDescription: null, pattern: null };
+  const match = description.match(RECURRING_METADATA_REGEX);
+  if (!match) return { cleanDescription: description, pattern: null };
+
+  try {
+    const parsed = JSON.parse(match[1]);
+    const cleanDescription = description.replace(RECURRING_METADATA_REGEX, '').trim() || null;
+    return { cleanDescription, pattern: parsed };
+  } catch {
+    return { cleanDescription: description, pattern: null };
+  }
+}
+
+/**
+ * Encodes recurrence pattern as markdown metadata attached to the description.
+ *
+ * @param description - Base task description
+ * @param pattern - Recurrence pattern to attach
+ * @returns Combined description string
+ */
+export function attachRecurrenceToDescription(
+  description: string | null | undefined,
+  pattern: RecurringPattern | null | undefined
+): string | null {
+  const base = description ? description.replace(RECURRING_METADATA_REGEX, '').trim() : '';
+  if (!pattern) return base || null;
+
+  const serialized = JSON.stringify(pattern);
+  return base ? `${base}\n\n<!-- recurring: ${serialized} -->` : `<!-- recurring: ${serialized} -->`;
+}
+

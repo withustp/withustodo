@@ -4,7 +4,11 @@ import { useState, useEffect, useCallback, useId } from 'react';
 import { createClient } from '@/lib/supabase/client';
 import { Task, TaskFilter } from '@/types';
 import { useTaskStore } from '@/stores/task-store';
-import { calculateNextDueDate } from '@/lib/recurrence';
+import {
+  calculateNextDueDate,
+  extractRecurrenceFromDescription,
+  attachRecurrenceToDescription,
+} from '@/lib/recurrence';
 
 /**
  * Hook for task operations with safe real-time updates and Zustand cache.
@@ -29,7 +33,7 @@ export function useTasks(filter?: TaskFilter) {
 
       let query = supabase
         .from('tasks')
-        .select('*, category:categories(*), recurring_patterns(*)')
+        .select('*, category:categories(*)')
         .eq('user_id', user.id)
         .eq('is_deleted', false);
       
@@ -46,21 +50,12 @@ export function useTasks(filter?: TaskFilter) {
       if (error) throw error;
 
       const formattedTasks: Task[] = ((data as any[]) || []).map((t) => {
-        const patternRaw = Array.isArray(t.recurring_patterns)
-          ? t.recurring_patterns[0]
-          : t.recurring_patterns;
+        const { cleanDescription, pattern } = extractRecurrenceFromDescription(t.description);
         return {
           ...t,
+          description: cleanDescription,
           is_recurring: Boolean(t.is_recurring),
-          recurring_pattern: patternRaw
-            ? {
-                type: patternRaw.type,
-                interval: patternRaw.interval_value ?? patternRaw.interval ?? 1,
-                days_of_week: patternRaw.days_of_week,
-                day_of_month: patternRaw.day_of_month,
-                end_date: patternRaw.end_date,
-              }
-            : null,
+          recurring_pattern: pattern,
         };
       });
       setTasks(formattedTasks);
@@ -100,11 +95,15 @@ export function useTasks(filter?: TaskFilter) {
 
       const { recurring_pattern, category, subtasks, labels, attachments, ...taskPayload } = task as any;
       const isRecurring = Boolean(task.is_recurring);
+      const descWithRecurrence = isRecurring && recurring_pattern
+        ? attachRecurrenceToDescription(taskPayload.description, recurring_pattern)
+        : (taskPayload.description || null);
 
       const { data, error } = await supabase
         .from('tasks')
         .insert([{
           ...taskPayload,
+          description: descWithRecurrence,
           user_id: userId,
           is_recurring: isRecurring,
           is_deleted: false,
@@ -114,36 +113,11 @@ export function useTasks(filter?: TaskFilter) {
 
       if (error) throw error;
 
-      let savedPattern = null;
-      if (isRecurring && recurring_pattern) {
-        const { data: pData, error: pError } = await supabase
-          .from('recurring_patterns')
-          .insert([{
-            task_id: data.id,
-            type: recurring_pattern.type,
-            interval_value: recurring_pattern.interval || 1,
-            days_of_week: recurring_pattern.days_of_week || null,
-            day_of_month: recurring_pattern.day_of_month || null,
-            end_date: recurring_pattern.end_date || null,
-          }])
-          .select()
-          .single();
-
-        if (!pError && pData) {
-          savedPattern = {
-            type: pData.type,
-            interval: pData.interval_value,
-            days_of_week: pData.days_of_week,
-            day_of_month: pData.day_of_month,
-            end_date: pData.end_date,
-          };
-        }
-      }
-
       const fullTask: Task = {
         ...data,
+        description: taskPayload.description || null,
         is_recurring: isRecurring,
-        recurring_pattern: savedPattern || recurring_pattern || null,
+        recurring_pattern: recurring_pattern || null,
       };
 
       addTask(fullTask);
@@ -159,28 +133,31 @@ export function useTasks(filter?: TaskFilter) {
     try {
       const { data: { user } } = await supabase.auth.getUser();
       const { recurring_pattern, category, subtasks, labels, attachments, ...dbUpdates } = updates as any;
+      const existingTask = tasks.find((t) => t.id === id);
+
+      if (
+        updates.recurring_pattern !== undefined ||
+        updates.is_recurring !== undefined ||
+        updates.description !== undefined
+      ) {
+        const targetPattern =
+          updates.is_recurring === false
+            ? null
+            : (updates.recurring_pattern !== undefined
+                ? updates.recurring_pattern
+                : existingTask?.recurring_pattern);
+        const baseDesc =
+          updates.description !== undefined
+            ? updates.description
+            : existingTask?.description;
+        dbUpdates.description = attachRecurrenceToDescription(baseDesc, targetPattern);
+      }
 
       if (Object.keys(dbUpdates).length > 0) {
         let query = supabase.from('tasks').update(dbUpdates).eq('id', id);
         if (user) query = query.eq('user_id', user.id);
         const { error } = await query;
         if (error) throw error;
-      }
-
-      if (updates.is_recurring === false) {
-        await supabase.from('recurring_patterns').delete().eq('task_id', id);
-      } else if (recurring_pattern) {
-        await supabase.from('recurring_patterns').upsert(
-          {
-            task_id: id,
-            type: recurring_pattern.type,
-            interval_value: recurring_pattern.interval || 1,
-            days_of_week: recurring_pattern.days_of_week || null,
-            day_of_month: recurring_pattern.day_of_month || null,
-            end_date: recurring_pattern.end_date || null,
-          },
-          { onConflict: 'task_id' }
-        );
       }
     } catch (err: any) {
       setError(err);
