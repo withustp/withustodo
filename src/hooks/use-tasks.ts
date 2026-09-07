@@ -101,7 +101,7 @@ export function useTasks(filter?: TaskFilter) {
         userId = user.id;
       }
 
-      const { recurring_pattern, category, subtasks, labels, attachments, ...taskPayload } = task as any;
+      const { recurring_pattern, category, subtasks, labels, attachments, completed_at, ...taskPayload } = task as any;
       const isRecurring = Boolean(task.is_recurring);
       const descWithRecurrence = isRecurring && recurring_pattern
         ? attachRecurrenceToDescription(taskPayload.description, recurring_pattern)
@@ -140,7 +140,7 @@ export function useTasks(filter?: TaskFilter) {
     updateTaskInStore(id, updates);
     try {
       const { data: { user } } = await supabase.auth.getUser();
-      const { recurring_pattern, category, subtasks, labels, attachments, ...dbUpdates } = updates as any;
+      const { recurring_pattern, category, subtasks, labels, attachments, completed_at, ...dbUpdates } = updates as any;
       const existingTask = allTasks.find((t) => t.id === id);
 
       if (
@@ -166,6 +166,37 @@ export function useTasks(filter?: TaskFilter) {
         if (user) query = query.eq('user_id', user.id);
         const { error } = await query;
         if (error) throw error;
+      }
+
+      // Automatically generate next occurrence when a recurring task is transitioned to 'done'
+      if (
+        updates.status === 'done' &&
+        existingTask &&
+        existingTask.status !== 'done' &&
+        existingTask.is_recurring &&
+        existingTask.recurring_pattern
+      ) {
+        const nextDueDate = calculateNextDueDate(
+          existingTask.due_date || new Date(),
+          existingTask.recurring_pattern
+        );
+
+        if (nextDueDate) {
+          try {
+            await createTask({
+              title: existingTask.title,
+              description: existingTask.description,
+              priority: existingTask.priority,
+              category_id: existingTask.category_id,
+              status: 'todo',
+              due_date: nextDueDate.toISOString(),
+              is_recurring: true,
+              recurring_pattern: existingTask.recurring_pattern,
+            });
+          } catch {
+            // Failure to schedule next recurrence should not block updating current task
+          }
+        }
       }
     } catch (err: any) {
       setError(err);
@@ -194,46 +225,27 @@ export function useTasks(filter?: TaskFilter) {
 
   const toggleStatus = async (id: string, currentStatus: Task['status']) => {
     const newStatus = currentStatus === 'done' ? 'todo' : 'done';
-    const completedAt = newStatus === 'done' ? new Date().toISOString() : null;
-    const existingTask = allTasks.find((t) => t.id === id);
-
     await updateTask(id, {
       status: newStatus,
-      completed_at: completedAt,
     });
-
-    // Automatically generate next occurrence when a recurring task is completed
-    if (newStatus === 'done' && existingTask?.is_recurring && existingTask.recurring_pattern) {
-      const nextDueDate = calculateNextDueDate(
-        existingTask.due_date || new Date(),
-        existingTask.recurring_pattern
-      );
-
-      if (nextDueDate) {
-        try {
-          await createTask({
-            title: existingTask.title,
-            description: existingTask.description,
-            priority: existingTask.priority,
-            category_id: existingTask.category_id,
-            status: 'todo',
-            due_date: nextDueDate.toISOString(),
-            is_recurring: true,
-            recurring_pattern: existingTask.recurring_pattern,
-          });
-        } catch {
-          // Failure to schedule next recurrence should not prevent completing current task
-        }
-      }
-    }
   };
 
   const reorderTasks = async (tasksList: { id: string; sort_order: number }[]) => {
+    // Optimistically update store
+    const sortMap = new Map(tasksList.map((t) => [t.id, t.sort_order]));
+    useTaskStore.setState((state) => ({
+      tasks: state.tasks.map((t) => (sortMap.has(t.id) ? { ...t, sort_order: sortMap.get(t.id)! } : t)),
+    }));
+
     try {
-      const { error } = await supabase.from('tasks').upsert(tasksList.map(t => ({ id: t.id, sort_order: t.sort_order })));
-      if (error) throw error;
+      await Promise.all(
+        tasksList.map((t) =>
+          supabase.from('tasks').update({ sort_order: t.sort_order }).eq('id', t.id)
+        )
+      );
     } catch (err: any) {
       setError(err);
+      fetchTasks();
       throw err;
     }
   };

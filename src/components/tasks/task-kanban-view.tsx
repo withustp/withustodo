@@ -302,10 +302,10 @@ export function TaskKanbanView() {
 
   const handleDragEnd = async (event: DragEndEvent) => {
     const { active, over } = event;
-    setActiveTaskId(null);
-    setHoveredColumn(null);
 
     if (!over) {
+      setActiveTaskId(null);
+      setHoveredColumn(null);
       setKanbanTasks(tasks);
       return;
     }
@@ -315,7 +315,11 @@ export function TaskKanbanView() {
 
     const originalTask = tasks.find(t => t.id === activeId);
     const currentTask = kanbanTasks.find(t => t.id === activeId);
-    if (!originalTask || !currentTask) return;
+    if (!originalTask || !currentTask) {
+      setActiveTaskId(null);
+      setHoveredColumn(null);
+      return;
+    }
 
     const isOverColumn = COLUMNS.includes(overId as TaskStatus);
     let targetStatus: TaskStatus = currentTask.status;
@@ -352,16 +356,20 @@ export function TaskKanbanView() {
 
     // Persist status change to Supabase and Zustand store
     if (originalTask.status !== targetStatus) {
-      const completedAt = targetStatus === 'done' ? new Date().toISOString() : null;
+      setKanbanTasks(prev =>
+        prev.map(t => (t.id === activeId ? { ...t, status: targetStatus } : t))
+      );
       try {
         await updateTask(activeId, {
           status: targetStatus,
-          completed_at: completedAt,
         });
       } catch {
         setKanbanTasks(tasks);
       }
     }
+
+    setActiveTaskId(null);
+    setHoveredColumn(null);
   };
 
   const handleDragCancel = () => {
