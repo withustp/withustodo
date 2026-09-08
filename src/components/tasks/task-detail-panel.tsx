@@ -14,6 +14,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Priority, RecurringType } from '@/types';
 import { cn } from '@/lib/utils';
 import { formatRecurrenceSummary } from '@/lib/recurrence';
+import { getDueDateStatus } from '@/lib/date-utils';
 
 /**
  * Task detail drawer panel component allowing real-time editing of
@@ -214,10 +215,27 @@ export function TaskDetailPanel() {
 
                 {/* Due Date */}
                 <div className="space-y-1 col-span-2">
-                  <label className="text-[11px] font-medium text-muted-foreground flex items-center gap-1">
-                    <CalendarIcon size={11} />
-                    {t('dueDate')}
-                  </label>
+                  <div className="flex items-center justify-between">
+                    <label className="text-[11px] font-medium text-muted-foreground flex items-center gap-1">
+                      <CalendarIcon size={11} />
+                      {t('dueDate')}
+                    </label>
+                    {(() => {
+                      const status = getDueDateStatus(dueDate, task?.status === 'done');
+                      if (!status || !status.remainingText) return null;
+                      return (
+                        <span className={cn(
+                          "text-[10px] font-semibold px-1.5 py-0.5 rounded border",
+                          status.isOverdue && "bg-destructive/10 text-destructive border-destructive/30",
+                          status.isToday && "bg-amber-500/10 text-amber-500 border-amber-500/30",
+                          status.isTomorrow && "bg-amber-400/10 text-amber-400 border-amber-400/30",
+                          !status.isOverdue && !status.isToday && !status.isTomorrow && "bg-primary/10 text-primary border-primary/30"
+                        )}>
+                          {status.remainingText}
+                        </span>
+                      );
+                    })()}
+                  </div>
                   <Input
                     type="date"
                     value={dueDate}

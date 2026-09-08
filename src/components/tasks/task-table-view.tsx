@@ -9,6 +9,7 @@ import { Badge } from '@/components/ui/badge';
 import { Repeat } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { formatRecurrenceSummary } from '@/lib/recurrence';
+import { getDueDateStatus } from '@/lib/date-utils';
 
 /**
  * Task table view component
@@ -94,7 +95,23 @@ export function TaskTableView() {
                   {task.category?.name || '-'}
                 </td>
                 <td className="p-3 text-xs text-muted-foreground">
-                  {task.due_date ? format(new Date(task.due_date), 'MMM d, yyyy') : '-'}
+                  {task.due_date ? (() => {
+                    const status = getDueDateStatus(task.due_date, task.status === 'done');
+                    if (!status) return '-';
+                    return (
+                      <span className={cn(
+                        "inline-flex items-center gap-1.5",
+                        status.isOverdue && "text-destructive font-medium",
+                        status.isToday && "text-amber-500 font-medium",
+                        status.isTomorrow && "text-amber-400 font-medium"
+                      )}>
+                        <span>{format(new Date(task.due_date), 'MMM d, yyyy')}</span>
+                        {status.remainingText && (
+                          <span className="text-[11px] opacity-85 font-medium">({status.remainingText})</span>
+                        )}
+                      </span>
+                    );
+                  })() : '-'}
                 </td>
               </tr>
             );

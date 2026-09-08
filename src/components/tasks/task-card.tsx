@@ -4,12 +4,13 @@ import { motion } from 'framer-motion';
 import { Task } from '@/types';
 import { useTaskStore } from '@/stores/task-store';
 import { useTasks } from '@/hooks/use-tasks';
-import { GripVertical, Paperclip, Check, Calendar as CalendarIcon, AlertCircle, Repeat } from 'lucide-react';
+import { GripVertical, Paperclip, Check, Calendar as CalendarIcon, AlertCircle, Clock, Repeat } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Badge } from '@/components/ui/badge';
 import { format } from 'date-fns';
 import { formatRecurrenceSummary } from '@/lib/recurrence';
+import { getDueDateStatus } from '@/lib/date-utils';
 
 export interface TaskCardProps {
   task: Task;
@@ -47,7 +48,8 @@ export function TaskCard({ task, isDragging, isOverlay, attributes, listeners }:
     openDetailPanel(task.id);
   };
 
-  const isOverdue = task.due_date && !isDone && new Date(task.due_date) < new Date();
+  const dueDateStatus = getDueDateStatus(task.due_date, isDone);
+  const isOverdue = Boolean(dueDateStatus?.isOverdue);
 
   return (
     <motion.div
@@ -63,81 +65,84 @@ export function TaskCard({ task, isDragging, isOverlay, attributes, listeners }:
           ? "border-dashed border-primary/40 bg-primary/5 opacity-30 shadow-inner cursor-grabbing"
           : isSelected
           ? "border-primary bg-primary/10 ring-1 ring-primary/40 shadow-md cursor-grab active:cursor-grabbing"
-          : "border-border/70 bg-card/70 hover:border-primary/40 hover:bg-muted/40 shadow-sm cursor-grab active:cursor-grabbing",
-        isDone && !isOverlay && "opacity-60 bg-muted/20"
+          : isDone
+          ? "border-border/30 bg-card/40 opacity-60 hover:opacity-100 hover:border-border/60 cursor-grab active:cursor-grabbing"
+          : "border-border/50 bg-card/70 hover:bg-card/90 hover:border-border/80 hover:shadow-sm cursor-grab active:cursor-grabbing"
       )}
       whileHover={isOverlay ? undefined : { scale: 1.008 }}
       transition={{ duration: 0.15 }}
     >
-      {/* Priority Color Bar on Left */}
+      {/* Priority Color Stripe on the Left */}
       <div 
         className={cn(
-          "absolute left-0 top-2 bottom-2 w-1 rounded-r-full transition-colors",
+          "absolute left-0 top-2 bottom-2 w-1 rounded-r-full transition-all",
           task.priority === 'high' && "bg-destructive shadow-[0_0_8px_rgba(239,68,68,0.5)]",
           task.priority === 'medium' && "bg-amber-500 shadow-[0_0_8px_rgba(245,158,11,0.5)]",
-          task.priority === 'low' && "bg-blue-500",
+          task.priority === 'low' && "bg-blue-500 shadow-[0_0_8px_rgba(59,130,246,0.5)]",
           task.priority === 'none' && "bg-transparent"
-        )}
+        )} 
       />
 
-      {/* Drag Grip visual handle */}
-      <div 
-        className="flex items-center opacity-40 group-hover:opacity-100 transition-opacity cursor-grab active:cursor-grabbing pl-0.5 pr-1.5 text-muted-foreground"
-        title="드래그하여 이동"
-      >
-        <GripVertical className="w-3.5 h-3.5" />
+      {/* Drag Handle Indicator */}
+      <div className="text-muted-foreground/30 group-hover:text-muted-foreground/70 transition-colors mr-1 cursor-grab active:cursor-grabbing">
+        <GripVertical size={14} />
       </div>
 
-      {/* Selection Checkbox (stops pointer down to prevent accidental drag) */}
+      {/* Select Checkbox (Hover/Selected) */}
       <div 
-        className={cn(
-          "pr-2.5 transition-opacity cursor-pointer",
-          isSelected ? "opacity-100" : "opacity-40 group-hover:opacity-100"
-        )} 
-        onPointerDown={(e) => e.stopPropagation()}
         onClick={handleSelect}
+        className={cn(
+          "mr-2 transition-opacity",
+          isSelected ? "opacity-100" : "opacity-0 group-hover:opacity-100 focus-within:opacity-100"
+        )}
       >
-        <Checkbox checked={isSelected} className="border-border/80 data-[state=checked]:bg-primary data-[state=checked]:border-primary" />
+        <Checkbox 
+          checked={isSelected} 
+          className="h-4 w-4 border-muted-foreground/40 data-[state=checked]:bg-primary data-[state=checked]:border-primary"
+        />
       </div>
 
-      {/* Crisp Glowing Status Circle Toggle (stops pointer down to prevent accidental drag) */}
-      <button 
+      {/* Glowing Completion Toggle Circle */}
+      <button
         type="button"
         onPointerDown={(e) => e.stopPropagation()}
         onClick={handleToggleStatus}
         className={cn(
-          "w-5 h-5 rounded-full border-2 flex items-center justify-center cursor-pointer mr-3 transition-all shrink-0",
-          isDone 
-            ? "bg-primary border-primary text-primary-foreground shadow-[0_0_10px_rgba(99,102,241,0.5)]" 
-            : "border-primary/60 hover:border-primary hover:bg-primary/20 hover:scale-110 shadow-sm"
+          "relative flex items-center justify-center w-5 h-5 rounded-full border-2 transition-all mr-3 shrink-0 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary",
+          isDone
+            ? "border-primary bg-primary text-primary-foreground shadow-[0_0_10px_rgba(99,102,241,0.5)]"
+            : "border-muted-foreground/40 hover:border-primary hover:scale-105"
         )}
-        title={isDone ? "완료 취소" : "완료 처리"}
       >
-        {isDone && <Check className="w-3 h-3 stroke-[3]" />}
+        {isDone && <Check size={11} className="stroke-[3]" />}
       </button>
 
-      {/* Task Content */}
+      {/* Content Area */}
       <div className="flex-1 min-w-0 pr-2">
-        <div className={cn(
-          "text-sm font-semibold truncate transition-colors",
-          isDone ? "line-through text-muted-foreground" : "text-foreground"
+        {/* Title */}
+        <h4 className={cn(
+          "text-sm font-semibold tracking-tight transition-all truncate text-foreground",
+          isDone && "line-through text-muted-foreground font-normal"
         )}>
           {task.title}
-        </div>
+        </h4>
 
-        {/* Metadata Badges */}
-        <div className="flex items-center flex-wrap gap-2 mt-1.5 text-xs text-muted-foreground">
-          {/* Category Pill */}
+        {/* Metadata Row */}
+        <div className="flex flex-wrap items-center gap-2 mt-1.5 text-xs text-muted-foreground">
+          {/* Category Chip */}
           {task.category && (
-            <span 
-              className="inline-flex items-center gap-1 text-[11px] font-medium px-2 py-0.5 rounded-md border"
+            <span
+              className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[11px] font-semibold border transition-all"
               style={{
                 backgroundColor: `${task.category.color}15`,
-                borderColor: `${task.category.color}35`,
-                color: task.category.color
+                borderColor: `${task.category.color}40`,
+                color: task.category.color,
               }}
             >
-              <span className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: task.category.color }} />
+              <span
+                className="w-1.5 h-1.5 rounded-full"
+                style={{ backgroundColor: task.category.color }}
+              />
               {task.category.name}
             </span>
           )}
@@ -157,15 +162,29 @@ export function TaskCard({ task, isDragging, isOverlay, attributes, listeners }:
             </Badge>
           )}
 
-          {/* Due Date */}
-          {task.due_date && (
+          {/* Due Date & Remaining Days Countdown */}
+          {dueDateStatus && (
             <span className={cn(
               "inline-flex items-center gap-1 font-medium text-[11px]",
-              isOverdue ? "text-destructive font-semibold" : "text-muted-foreground"
+              dueDateStatus.isOverdue
+                ? "text-destructive font-semibold"
+                : dueDateStatus.isToday
+                ? "text-amber-500 font-semibold"
+                : dueDateStatus.isTomorrow
+                ? "text-amber-400 font-medium"
+                : "text-muted-foreground"
             )}>
-              {isOverdue ? <AlertCircle size={11} /> : <CalendarIcon size={11} />}
-              {format(new Date(task.due_date), 'MMM d')}
-              {isOverdue && ' (기한 초과)'}
+              {dueDateStatus.isOverdue ? (
+                <AlertCircle size={11} className="shrink-0" />
+              ) : dueDateStatus.isToday ? (
+                <Clock size={11} className="shrink-0 text-amber-500" />
+              ) : (
+                <CalendarIcon size={11} className="shrink-0" />
+              )}
+              <span>{dueDateStatus.formattedDate}</span>
+              {dueDateStatus.remainingText && (
+                <span>({dueDateStatus.remainingText})</span>
+              )}
             </span>
           )}
 
