@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect, useCallback, useId, useMemo } from 'react';
+import { format } from 'date-fns';
 import { createClient } from '@/lib/supabase/client';
 import { Task, TaskFilter } from '@/types';
 import { useTaskStore } from '@/stores/task-store';
@@ -137,29 +138,47 @@ export function useTasks(filter?: TaskFilter) {
   };
 
   const updateTask = async (id: string, updates: Partial<Task>) => {
-    updateTaskInStore(id, updates);
     try {
-      const { data: { user } } = await supabase.auth.getUser();
-      const { recurring_pattern, category, subtasks, labels, attachments, completed_at, ...dbUpdates } = updates as any;
       const existingTask = allTasks.find((t) => t.id === id);
+      const appliedUpdates = { ...updates };
+
+      // If completing a task that has no due date, persist a concrete completion date
+      // so it remains anchored to that calendar date instead of disappearing
+      if (
+        appliedUpdates.status === 'done' &&
+        existingTask &&
+        existingTask.status !== 'done' &&
+        !existingTask.due_date &&
+        !appliedUpdates.due_date
+      ) {
+        appliedUpdates.due_date = new Date().toISOString();
+      }
+
+      updateTaskInStore(id, appliedUpdates);
+
+      const { data: { user } } = await supabase.auth.getUser();
+      const { recurring_pattern, category, subtasks, labels, attachments, completed_at, ...dbUpdates } = appliedUpdates as any;
 
       if (
-        updates.recurring_pattern !== undefined ||
-        updates.is_recurring !== undefined ||
-        updates.description !== undefined
+        appliedUpdates.recurring_pattern !== undefined ||
+        appliedUpdates.is_recurring !== undefined ||
+        appliedUpdates.description !== undefined
       ) {
         const targetPattern =
-          updates.is_recurring === false
+          appliedUpdates.is_recurring === false
             ? null
-            : (updates.recurring_pattern !== undefined
-                ? updates.recurring_pattern
+            : (appliedUpdates.recurring_pattern !== undefined
+                ? appliedUpdates.recurring_pattern
                 : existingTask?.recurring_pattern);
         const baseDesc =
-          updates.description !== undefined
-            ? updates.description
+          appliedUpdates.description !== undefined
+            ? appliedUpdates.description
             : existingTask?.description;
         dbUpdates.description = attachRecurrenceToDescription(baseDesc, targetPattern);
       }
+
+      // Always maintain accurate updated_at timestamp in Supabase
+      dbUpdates.updated_at = new Date().toISOString();
 
       if (Object.keys(dbUpdates).length > 0) {
         let query = supabase.from('tasks').update(dbUpdates).eq('id', id);
@@ -170,14 +189,15 @@ export function useTasks(filter?: TaskFilter) {
 
       // Automatically generate next occurrence when a recurring task is transitioned to 'done'
       if (
-        updates.status === 'done' &&
+        appliedUpdates.status === 'done' &&
         existingTask &&
         existingTask.status !== 'done' &&
         existingTask.is_recurring &&
         existingTask.recurring_pattern
       ) {
+        const baseDate = appliedUpdates.due_date || existingTask.due_date || new Date();
         const nextDueDate = calculateNextDueDate(
-          existingTask.due_date || new Date(),
+          baseDate,
           existingTask.recurring_pattern
         );
 
@@ -223,11 +243,33 @@ export function useTasks(filter?: TaskFilter) {
     }
   };
 
-  const toggleStatus = async (id: string, currentStatus: Task['status']) => {
+  const toggleStatus = async (
+    id: string,
+    currentStatus: Task['status'],
+    targetDate?: Date | string
+  ) => {
     const newStatus = currentStatus === 'done' ? 'todo' : 'done';
-    await updateTask(id, {
+    const existingTask = allTasks.find((t) => t.id === id);
+
+    const updates: Partial<Task> = {
       status: newStatus,
-    });
+    };
+
+    if (newStatus === 'done') {
+      if (targetDate) {
+        const dateStr =
+          typeof targetDate === 'string'
+            ? targetDate
+            : format(targetDate, "yyyy-MM-dd'T'12:00:00XXX");
+        if (!existingTask?.due_date) {
+          updates.due_date = dateStr;
+        }
+      } else if (!existingTask?.due_date) {
+        updates.due_date = new Date().toISOString();
+      }
+    }
+
+    await updateTask(id, updates);
   };
 
   const reorderTasks = async (tasksList: { id: string; sort_order: number }[]) => {

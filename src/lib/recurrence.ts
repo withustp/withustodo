@@ -242,10 +242,11 @@ export function isTaskScheduledOnDate(task: Task, targetDate: Date): boolean {
     return format(due, 'yyyy-MM-dd') === targetDayStr;
   }
 
-  // Completed recurring tasks only appear on their due date (if any)
+  // Completed recurring tasks appear on their due date (or completion date fallback)
   if (task.status === 'done') {
-    if (!task.due_date) return false;
-    const due = parseISO(task.due_date);
+    const effectiveDateStr = task.due_date || task.updated_at || task.created_at;
+    if (!effectiveDateStr) return false;
+    const due = parseISO(effectiveDateStr);
     if (!isValid(due)) return false;
     return format(due, 'yyyy-MM-dd') === targetDayStr;
   }

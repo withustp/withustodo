@@ -35,7 +35,7 @@ export function DayDetail({ date, onClose }: DayDetailProps) {
             return (
               <div 
                 key={task.id} 
-                onClick={() => toggleStatus(task.id, task.status)}
+                onClick={() => toggleStatus(task.id, task.status, date)}
                 className="flex items-center gap-3 p-3 rounded-lg border border-border hover:bg-muted/50 transition-colors cursor-pointer"
               >
                 {isDone ? (
