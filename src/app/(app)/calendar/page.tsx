@@ -39,7 +39,7 @@ export default function CalendarPage() {
     : format(currentDate, 'MMMM yyyy');
 
   return (
-    <div className="flex flex-col gap-6 p-6 h-full">
+    <div className="flex flex-col gap-6 p-4 sm:p-6 min-h-full pb-24 sm:pb-28">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div className="flex items-center gap-4">
           <h1 className="text-3xl font-bold tracking-tight">
@@ -75,7 +75,7 @@ export default function CalendarPage() {
         </div>
       </div>
 
-      <div className="flex-1 min-h-0 bg-white/5 dark:bg-white/5 backdrop-blur-xl border border-white/10 rounded-xl overflow-hidden">
+      <div className="flex-1 min-h-fit bg-white/5 dark:bg-white/5 backdrop-blur-xl border border-white/10 rounded-xl overflow-hidden flex flex-col shadow-sm">
         <CalendarGrid currentDate={currentDate} view={view} />
       </div>
     </div>

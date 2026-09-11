@@ -31,6 +31,7 @@ export function CalendarGrid({ currentDate, view }: CalendarGridProps) {
   const endDate = isWeekView ? endOfWeek(currentDate) : endOfWeek(monthEnd);
 
   const days = eachDayOfInterval({ start: startDate, end: endDate });
+  const numWeeks = isWeekView ? 1 : Math.ceil(days.length / 7);
   const weekDays = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 
   // Map real tasks and projected recurring occurrences by calendar date (YYYY-MM-DD)
@@ -56,7 +57,7 @@ export function CalendarGrid({ currentDate, view }: CalendarGridProps) {
 
   return (
     <>
-      <div className="flex flex-col h-full">
+      <div className="flex flex-col h-full min-h-fit">
         <div className="grid grid-cols-7 border-b border-border">
           {weekDays.map((day) => (
             <div key={day} className="p-3 text-center text-sm font-medium text-muted-foreground">
@@ -64,10 +65,14 @@ export function CalendarGrid({ currentDate, view }: CalendarGridProps) {
             </div>
           ))}
         </div>
-        <div className={cn(
-          "flex-1 grid grid-cols-7",
-          isWeekView ? "grid-rows-1" : "grid-rows-5 md:grid-rows-6"
-        )}>
+        <div 
+          className="flex-1 grid grid-cols-7"
+          style={{
+            gridTemplateRows: isWeekView 
+              ? 'minmax(360px, 1fr)' 
+              : `repeat(${numWeeks}, minmax(110px, 1fr))`
+          }}
+        >
           {days.map((day) => {
             const dateStr = format(day, 'yyyy-MM-dd');
             const dayTasks = taskMap[dateStr] || [];
@@ -78,7 +83,7 @@ export function CalendarGrid({ currentDate, view }: CalendarGridProps) {
                 onClick={() => setSelectedDate(day)}
                 className={cn(
                   "p-2 border-b border-r border-border/50 transition-colors hover:bg-muted/30 cursor-pointer flex flex-col gap-1 overflow-hidden",
-                  isWeekView ? "min-h-[300px]" : "min-h-[85px]",
+                  isWeekView ? "min-h-[360px]" : "min-h-[110px] sm:min-h-[115px]",
                   !isWeekView && !isSameMonth(day, monthStart) && "bg-muted/10 opacity-50",
                   isToday(day) && "bg-primary/5"
                 )}
