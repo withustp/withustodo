@@ -9,7 +9,6 @@ import { TaskListView } from '@/components/tasks/task-list-view';
 import { TaskKanbanView } from '@/components/tasks/task-kanban-view';
 import { TaskTableView } from '@/components/tasks/task-table-view';
 import { TaskCreateModal } from '@/components/tasks/task-create-modal';
-import { TaskDetailPanel } from '@/components/tasks/task-detail-panel';
 import { TaskFilters } from '@/components/tasks/task-filters';
 import { BulkActionBar } from '@/components/tasks/bulk-action-bar';
 import { Button } from '@/components/ui/button';
@@ -65,7 +64,6 @@ export default function TasksPage() {
       </div>
 
       {isCreateModalOpen && <TaskCreateModal />}
-      {detailPanelTaskId && <TaskDetailPanel />}
       {selectedTaskIds.length > 0 && <BulkActionBar />}
     </motion.div>
   );

@@ -4,16 +4,35 @@ import { useState, useEffect, useCallback } from 'react';
 import { createClient } from '@/lib/supabase/client';
 import { Category } from '@/types';
 
+// Global in-memory cache to guarantee zero-latency category resolution across all components
+let globalCategoriesCache: Category[] | null = null;
+const cacheListeners = new Set<(cats: Category[]) => void>();
+
+function notifyCategoryListeners(cats: Category[]) {
+  globalCategoriesCache = cats;
+  cacheListeners.forEach((listener) => listener(cats));
+}
+
 /**
  * Hook for category operations with task counting, authenticated user_id injection, and realtime sync
  */
 export function useCategories() {
-  const [categories, setCategories] = useState<Category[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const [categories, setCategories] = useState<Category[]>(globalCategoriesCache || []);
+  const [isLoading, setIsLoading] = useState(!globalCategoriesCache);
   const supabase = createClient();
 
+  useEffect(() => {
+    const handler = (cats: Category[]) => setCategories(cats);
+    cacheListeners.add(handler);
+    return () => {
+      cacheListeners.delete(handler);
+    };
+  }, []);
+
   const fetchCategories = useCallback(async () => {
-    setIsLoading(true);
+    if (!globalCategoriesCache) {
+      setIsLoading(true);
+    }
     try {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) return;
@@ -46,7 +65,7 @@ export function useCategories() {
         task_count: taskCounts[cat.id] || 0,
       }));
 
-      setCategories(categoriesWithCount);
+      notifyCategoryListeners(categoriesWithCount);
     } catch (err) {
       console.error('Failed to fetch categories:', err);
     } finally {
@@ -77,12 +96,14 @@ export function useCategories() {
       .single();
 
     if (error) throw error;
-    setCategories((prev) => [...prev, { ...(data as any), task_count: 0 }]);
+    const updated = [...(globalCategoriesCache || categories), { ...(data as any), task_count: 0 }];
+    notifyCategoryListeners(updated);
     return data;
   };
 
   const updateCategory = async (id: string, updates: Partial<Category>) => {
-    setCategories((prev) => prev.map((c) => (c.id === id ? { ...c, ...updates } : c)));
+    const updated = (globalCategoriesCache || categories).map((c) => (c.id === id ? { ...c, ...updates } : c));
+    notifyCategoryListeners(updated);
     const { error } = await supabase.from('categories').update(updates).eq('id', id);
     if (error) {
       fetchCategories();
@@ -91,7 +112,8 @@ export function useCategories() {
   };
 
   const deleteCategory = async (id: string) => {
-    setCategories((prev) => prev.filter((c) => c.id !== id));
+    const updated = (globalCategoriesCache || categories).filter((c) => c.id !== id);
+    notifyCategoryListeners(updated);
     const { error } = await supabase.from('categories').delete().eq('id', id);
     if (error) {
       fetchCategories();

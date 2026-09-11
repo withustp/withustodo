@@ -174,11 +174,21 @@ export function TaskDetailPanel() {
                 <div className="space-y-1">
                   <label className="text-[11px] font-medium text-muted-foreground flex items-center gap-1">
                     <Flag size={11} />
-                    {t('priority.none')}
+                    {t('table.priority')}
                   </label>
                   <Select value={priority} onValueChange={(val: string) => handlePriorityChange(val as Priority)}>
                     <SelectTrigger className="h-8 text-xs bg-background">
-                      <SelectValue />
+                      <SelectValue placeholder={t('priority.none')}>
+                        {priority === 'high' ? (
+                          <span className="text-destructive font-semibold">{t('priority.high')}</span>
+                        ) : priority === 'medium' ? (
+                          <span className="text-amber-500 font-medium">{t('priority.medium')}</span>
+                        ) : priority === 'low' ? (
+                          <span className="text-blue-500 font-medium">{t('priority.low')}</span>
+                        ) : (
+                          <span>{t('priority.none')}</span>
+                        )}
+                      </SelectValue>
                     </SelectTrigger>
                     <SelectContent>
                       <SelectItem value="none">{t('priority.none')}</SelectItem>
@@ -197,10 +207,33 @@ export function TaskDetailPanel() {
                   </label>
                   <Select value={categoryId} onValueChange={handleCategoryChange}>
                     <SelectTrigger className="h-8 text-xs bg-background">
-                      <SelectValue placeholder="미분류" />
+                      <SelectValue placeholder="미분류">
+                        {(() => {
+                          if (categoryId === 'none') return '미분류';
+                          const selectedCategory = categories.find((c) => c.id === categoryId) || task?.category;
+                          if (!selectedCategory) return '미분류';
+                          return (
+                            <span className="flex items-center gap-2">
+                              <span className="w-2 h-2 rounded-full shrink-0" style={{ backgroundColor: selectedCategory.color }} />
+                              <span className="truncate">{selectedCategory.name}</span>
+                            </span>
+                          );
+                        })()}
+                      </SelectValue>
                     </SelectTrigger>
                     <SelectContent>
                       <SelectItem value="none">미분류</SelectItem>
+                      {(() => {
+                        const activeCat = categories.find((c) => c.id === categoryId) || task?.category;
+                        return activeCat && !categories.some((c) => c.id === activeCat.id) ? (
+                          <SelectItem key={activeCat.id} value={activeCat.id}>
+                            <span className="flex items-center gap-2">
+                              <span className="w-2 h-2 rounded-full" style={{ backgroundColor: activeCat.color }} />
+                              {activeCat.name}
+                            </span>
+                          </SelectItem>
+                        ) : null;
+                      })()}
                       {categories.map((cat) => (
                         <SelectItem key={cat.id} value={cat.id}>
                           <span className="flex items-center gap-2">

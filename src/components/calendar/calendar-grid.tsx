@@ -6,6 +6,7 @@ import { cn } from '@/lib/utils';
 import { useState } from 'react';
 import { DayDetail } from './day-detail';
 import { useTasks } from '@/hooks/use-tasks';
+import { useTaskStore } from '@/stores/task-store';
 import { isTaskScheduledOnDate } from '@/lib/recurrence';
 
 interface CalendarGridProps {
@@ -21,6 +22,7 @@ export function CalendarGrid({ currentDate, view }: CalendarGridProps) {
   const t = useTranslations('Calendar.Grid');
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
   const { tasks } = useTasks();
+  const { openDetailPanel } = useTaskStore();
 
   const isWeekView = view === 'week';
   const monthStart = startOfMonth(currentDate);
@@ -86,8 +88,12 @@ export function CalendarGrid({ currentDate, view }: CalendarGridProps) {
                   {dayTasks.slice(0, isWeekView ? 8 : 2).map((task) => (
                     <div 
                       key={task.id}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        openDetailPanel(task.id);
+                      }}
                       className={cn(
-                        "flex items-center gap-1.5 px-1.5 py-0.5 rounded text-[11px] font-medium truncate transition-colors border",
+                        "flex items-center gap-1.5 px-1.5 py-0.5 rounded text-[11px] font-medium truncate transition-colors border cursor-pointer hover:bg-white/15",
                         task.status === 'done'
                           ? "line-through text-muted-foreground bg-white/[0.02] border-white/5 opacity-60"
                           : "text-foreground bg-white/[0.05] hover:bg-white/10 border-white/10"
@@ -98,7 +104,7 @@ export function CalendarGrid({ currentDate, view }: CalendarGridProps) {
                         ),
                         borderLeftWidth: '3px'
                       }}
-                      title={task.title}
+                      title={`${task.title} (클릭하여 수정)`}
                     >
                       <span className="truncate">{task.title}</span>
                     </div>

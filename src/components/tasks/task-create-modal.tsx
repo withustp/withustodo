@@ -174,7 +174,19 @@ export function TaskCreateModal() {
               </label>
               <Select value={categoryId} onValueChange={setCategoryId}>
                 <SelectTrigger className="w-full h-9 bg-white/[0.03] border-white/10 text-xs">
-                  <SelectValue placeholder="선택 안 함" />
+                  <SelectValue placeholder="선택 안 함">
+                    {(() => {
+                      if (!categoryId || categoryId === 'none') return '미분류';
+                      const cat = categories.find((c) => c.id === categoryId);
+                      if (!cat) return '미분류';
+                      return (
+                        <span className="flex items-center gap-2">
+                          <span className="w-2 h-2 rounded-full shrink-0" style={{ backgroundColor: cat.color }} />
+                          <span className="truncate">{cat.name}</span>
+                        </span>
+                      );
+                    })()}
+                  </SelectValue>
                 </SelectTrigger>
                 <SelectContent className="bg-[#12141C] border-white/10">
                   <SelectItem value="none">미분류</SelectItem>

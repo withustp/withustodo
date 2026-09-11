@@ -6,6 +6,7 @@ import { MobileNav } from '@/components/layout/mobile-nav';
 import { Header } from '@/components/layout/header';
 import { CommandPalette } from '@/components/layout/command-palette';
 import { AICopilot } from '@/components/chat/ai-copilot';
+import { TaskDetailPanel } from '@/components/tasks/task-detail-panel';
 import { cn } from '@/lib/utils';
 import { useEffect, useState } from 'react';
 
@@ -45,6 +46,7 @@ export default function AppLayout({
       <MobileNav />
       <CommandPalette />
       <AICopilot />
+      <TaskDetailPanel />
     </div>
   );
 }

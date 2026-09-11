@@ -229,15 +229,26 @@ SelectTrigger.displayName = 'SelectTrigger';
 export const SelectValue = ({
   placeholder = 'Select...',
   className,
+  children,
 }: {
   placeholder?: string;
   className?: string;
+  children?: React.ReactNode;
 }) => {
   const context = React.useContext(SelectContext);
-  const display = context?.value ? context.labels[context.value] || context.value : placeholder;
+  let display: React.ReactNode;
+  if (children !== undefined) {
+    display = children;
+  } else if (context?.value && context.labels[context.value]) {
+    display = context.labels[context.value];
+  } else if (context?.value && context.value !== 'none') {
+    display = context.value;
+  } else {
+    display = placeholder;
+  }
 
   return (
-    <span className={cn('truncate', !context?.value && 'text-muted-foreground', className)}>
+    <span className={cn('truncate', (!context?.value || context?.value === 'none') && !children && 'text-muted-foreground', className)}>
       {display}
     </span>
   );
@@ -253,22 +264,30 @@ export const SelectContent = ({
   const context = React.useContext(SelectContext);
 
   return (
-    <AnimatePresence>
-      {context?.isOpen && (
-        <motion.div
-          initial={{ opacity: 0, y: -5 }}
-          animate={{ opacity: 1, y: 0 }}
-          exit={{ opacity: 0, y: -5 }}
-          transition={{ duration: 0.15 }}
-          className={cn(
-            'absolute z-50 mt-1 max-h-60 w-full overflow-auto rounded-md border border-border bg-card text-card-foreground shadow-md backdrop-blur-xl p-1',
-            className
-          )}
-        >
+    <>
+      {/* Hidden registration container so SelectItem labels are registered before opening */}
+      {!context?.isOpen && (
+        <div className="hidden" aria-hidden="true">
           {children}
-        </motion.div>
+        </div>
       )}
-    </AnimatePresence>
+      <AnimatePresence>
+        {context?.isOpen && (
+          <motion.div
+            initial={{ opacity: 0, y: -5 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -5 }}
+            transition={{ duration: 0.15 }}
+            className={cn(
+              'absolute z-50 mt-1 max-h-60 w-full overflow-auto rounded-md border border-border bg-card text-card-foreground shadow-md backdrop-blur-xl p-1',
+              className
+            )}
+          >
+            {children}
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </>
   );
 };
 
