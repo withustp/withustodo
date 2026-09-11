@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useCallback, useId, useMemo } from 'react';
-import { format } from 'date-fns';
+import { format, parseISO } from 'date-fns';
 import { createClient } from '@/lib/supabase/client';
 import { Task, TaskFilter } from '@/types';
 import { useTaskStore } from '@/stores/task-store';
@@ -10,6 +10,9 @@ import {
   extractRecurrenceFromDescription,
   attachRecurrenceToDescription,
 } from '@/lib/recurrence';
+
+// In-flight guard to prevent rapid double-clicks from firing duplicate status updates
+const inFlightToggles = new Set<string>();
 
 /**
  * Hook for task operations with safe real-time updates, Zustand global cache,
@@ -202,19 +205,35 @@ export function useTasks(filter?: TaskFilter) {
         );
 
         if (nextDueDate) {
-          try {
-            await createTask({
-              title: existingTask.title,
-              description: existingTask.description,
-              priority: existingTask.priority,
-              category_id: existingTask.category_id,
-              status: 'todo',
-              due_date: nextDueDate.toISOString(),
-              is_recurring: true,
-              recurring_pattern: existingTask.recurring_pattern,
-            });
-          } catch {
-            // Failure to schedule next recurrence should not block updating current task
+          const nextDayStr = format(nextDueDate, 'yyyy-MM-dd');
+          const currentStoreTasks = useTaskStore.getState().tasks;
+          const duplicateExists = currentStoreTasks.some((t) => {
+            if (t.is_deleted || t.id === id) return false;
+            if (t.title !== existingTask.title) return false;
+            if (t.status === 'done') return false;
+            if (!t.due_date) return false;
+            try {
+              return format(parseISO(t.due_date), 'yyyy-MM-dd') === nextDayStr;
+            } catch {
+              return false;
+            }
+          });
+
+          if (!duplicateExists) {
+            try {
+              await createTask({
+                title: existingTask.title,
+                description: existingTask.description,
+                priority: existingTask.priority,
+                category_id: existingTask.category_id,
+                status: 'todo',
+                due_date: nextDueDate.toISOString(),
+                is_recurring: true,
+                recurring_pattern: existingTask.recurring_pattern,
+              });
+            } catch {
+              // Failure to schedule next recurrence should not block updating current task
+            }
           }
         }
       }
@@ -248,28 +267,35 @@ export function useTasks(filter?: TaskFilter) {
     currentStatus: Task['status'],
     targetDate?: Date | string
   ) => {
-    const newStatus = currentStatus === 'done' ? 'todo' : 'done';
-    const existingTask = allTasks.find((t) => t.id === id);
+    if (inFlightToggles.has(id)) return;
+    inFlightToggles.add(id);
 
-    const updates: Partial<Task> = {
-      status: newStatus,
-    };
+    try {
+      const newStatus = currentStatus === 'done' ? 'todo' : 'done';
+      const existingTask = allTasks.find((t) => t.id === id);
 
-    if (newStatus === 'done') {
-      if (targetDate) {
-        const dateStr =
-          typeof targetDate === 'string'
-            ? targetDate
-            : format(targetDate, "yyyy-MM-dd'T'12:00:00XXX");
-        if (!existingTask?.due_date) {
-          updates.due_date = dateStr;
+      const updates: Partial<Task> = {
+        status: newStatus,
+      };
+
+      if (newStatus === 'done') {
+        if (targetDate) {
+          const dateStr =
+            typeof targetDate === 'string'
+              ? targetDate
+              : format(targetDate, "yyyy-MM-dd'T'12:00:00XXX");
+          if (!existingTask?.due_date) {
+            updates.due_date = dateStr;
+          }
+        } else if (!existingTask?.due_date) {
+          updates.due_date = new Date().toISOString();
         }
-      } else if (!existingTask?.due_date) {
-        updates.due_date = new Date().toISOString();
       }
-    }
 
-    await updateTask(id, updates);
+      await updateTask(id, updates);
+    } finally {
+      inFlightToggles.delete(id);
+    }
   };
 
   const reorderTasks = async (tasksList: { id: string; sort_order: number }[]) => {

@@ -1,5 +1,6 @@
 'use client';
 
+import { useMemo } from 'react';
 import { useTranslations } from 'next-intl';
 import { format } from 'date-fns';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
@@ -23,7 +24,23 @@ export function DayDetail({ date, onClose }: DayDetailProps) {
   const { tasks, toggleStatus } = useTasks();
   const { openDetailPanel } = useTaskStore();
 
-  const dayTasks = tasks.filter((task) => isTaskScheduledOnDate(task, date));
+  const dayTasks = useMemo(() => {
+    const matched = tasks.filter((task) => isTaskScheduledOnDate(task, date));
+    const seenIds = new Set<string>();
+    const seenActiveKeys = new Set<string>();
+
+    return matched.filter((task) => {
+      if (seenIds.has(task.id)) return false;
+      seenIds.add(task.id);
+
+      if (task.status !== 'done' && task.is_recurring) {
+        const key = `${task.title.trim().toLowerCase()}_${task.category_id || 'none'}`;
+        if (seenActiveKeys.has(key)) return false;
+        seenActiveKeys.add(key);
+      }
+      return true;
+    });
+  }, [tasks, date]);
 
   return (
     <Dialog open onOpenChange={onClose}>

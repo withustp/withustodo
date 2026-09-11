@@ -37,7 +37,21 @@ export function CalendarGrid({ currentDate, view }: CalendarGridProps) {
   const taskMap: Record<string, typeof tasks> = {};
   days.forEach((day) => {
     const d = format(day, 'yyyy-MM-dd');
-    taskMap[d] = tasks.filter((task) => isTaskScheduledOnDate(task, day));
+    const matched = tasks.filter((task) => isTaskScheduledOnDate(task, day));
+    const seenIds = new Set<string>();
+    const seenActiveKeys = new Set<string>();
+
+    taskMap[d] = matched.filter((task) => {
+      if (seenIds.has(task.id)) return false;
+      seenIds.add(task.id);
+
+      if (task.status !== 'done' && task.is_recurring) {
+        const key = `${task.title.trim().toLowerCase()}_${task.category_id || 'none'}`;
+        if (seenActiveKeys.has(key)) return false;
+        seenActiveKeys.add(key);
+      }
+      return true;
+    });
   });
 
   return (
