@@ -8,7 +8,6 @@ import { useTaskStore } from '@/stores/task-store';
 import { TaskListView } from '@/components/tasks/task-list-view';
 import { TaskKanbanView } from '@/components/tasks/task-kanban-view';
 import { TaskTableView } from '@/components/tasks/task-table-view';
-import { TaskCreateModal } from '@/components/tasks/task-create-modal';
 import { TaskFilters } from '@/components/tasks/task-filters';
 import { BulkActionBar } from '@/components/tasks/bulk-action-bar';
 import { Button } from '@/components/ui/button';
@@ -19,7 +18,7 @@ import { cn } from '@/lib/utils';
  */
 export default function TasksPage() {
   const t = useTranslations('tasks');
-  const { viewMode, setViewMode, isCreateModalOpen, detailPanelTaskId, selectedTaskIds, openCreateModal } = useTaskStore();
+  const { viewMode, setViewMode, selectedTaskIds, openCreateModal } = useTaskStore();
 
   return (
     <motion.div 
@@ -63,7 +62,6 @@ export default function TasksPage() {
         {viewMode === 'table' && <TaskTableView />}
       </div>
 
-      {isCreateModalOpen && <TaskCreateModal />}
       {selectedTaskIds.length > 0 && <BulkActionBar />}
     </motion.div>
   );
