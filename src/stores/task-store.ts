@@ -13,6 +13,7 @@ interface TaskState {
   filters: TaskFilter;
   isCreateModalOpen: boolean;
   detailPanelTaskId: string | null;
+  detailPanelTargetDate: string | null;
 
   setTasks: (tasks: Task[]) => void;
   addTask: (task: Task) => void;
@@ -26,7 +27,7 @@ interface TaskState {
   clearFilters: () => void;
   openCreateModal: () => void;
   closeCreateModal: () => void;
-  openDetailPanel: (taskId: string) => void;
+  openDetailPanel: (taskId: string, targetDate?: string | Date | null) => void;
   closeDetailPanel: () => void;
 }
 
@@ -37,6 +38,7 @@ export const useTaskStore = create<TaskState>((set) => ({
   filters: {},
   isCreateModalOpen: false,
   detailPanelTaskId: null,
+  detailPanelTargetDate: null,
 
   setTasks: (tasks) => set({ tasks }),
   addTask: (task) => set((state) => ({ tasks: [...state.tasks, task] })),
@@ -69,6 +71,19 @@ export const useTaskStore = create<TaskState>((set) => ({
   clearFilters: () => set({ filters: {} }),
   openCreateModal: () => set({ isCreateModalOpen: true }),
   closeCreateModal: () => set({ isCreateModalOpen: false }),
-  openDetailPanel: (taskId) => set({ detailPanelTaskId: taskId }),
-  closeDetailPanel: () => set({ detailPanelTaskId: null }),
+  openDetailPanel: (taskId, targetDate) => {
+    let dateStr: string | null = null;
+    if (targetDate) {
+      if (typeof targetDate === 'string') {
+        dateStr = targetDate.includes('T') ? targetDate.split('T')[0] : targetDate;
+      } else if (targetDate instanceof Date) {
+        const y = targetDate.getFullYear();
+        const m = String(targetDate.getMonth() + 1).padStart(2, '0');
+        const d = String(targetDate.getDate()).padStart(2, '0');
+        dateStr = `${y}-${m}-${d}`;
+      }
+    }
+    set({ detailPanelTaskId: taskId, detailPanelTargetDate: dateStr });
+  },
+  closeDetailPanel: () => set({ detailPanelTaskId: null, detailPanelTargetDate: null }),
 }));

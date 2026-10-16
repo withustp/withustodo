@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useTaskStore } from '@/stores/task-store';
 import { useTasks } from '@/hooks/use-tasks';
@@ -13,9 +13,19 @@ import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Flag, Calendar as CalendarIcon, Tag, Repeat } from 'lucide-react';
 import { toast } from 'sonner';
+import { format } from 'date-fns';
 import { Priority, Status, RecurringType } from '@/types';
 import { cn } from '@/lib/utils';
 import { formatRecurrenceSummary } from '@/lib/recurrence';
+
+/**
+ * Returns today's local date formatted as YYYY-MM-DD for date inputs.
+ *
+ * @returns Date string in 'yyyy-MM-dd' format
+ */
+function getTodayDateString(): string {
+  return format(new Date(), 'yyyy-MM-dd');
+}
 
 /**
  * Enhanced Task creation modal using standardized Dialog with category, priority,
@@ -32,13 +42,13 @@ export function TaskCreateModal() {
   const [description, setDescription] = useState('');
   const [priority, setPriority] = useState<Priority>('none');
   const [categoryId, setCategoryId] = useState<string>('none');
-  const [dueDate, setDueDate] = useState('');
+  const [dueDate, setDueDate] = useState<string>(getTodayDateString);
   
   // Recurrence state
   const [isRecurring, setIsRecurring] = useState(false);
   const [recurringType, setRecurringType] = useState<RecurringType>('weekly');
   const [interval, setInterval] = useState(1);
-  const [daysOfWeek, setDaysOfWeek] = useState<number[]>([1]); // default to Monday
+  const [daysOfWeek, setDaysOfWeek] = useState<number[]>([new Date().getDay()]);
   const [hasEndDate, setHasEndDate] = useState(false);
   const [endDate, setEndDate] = useState('');
 
@@ -57,19 +67,26 @@ export function TaskCreateModal() {
     }
   };
 
-  const resetForm = () => {
+  const resetForm = useCallback(() => {
     setTitle('');
     setDescription('');
     setPriority('none');
     setCategoryId('none');
-    setDueDate('');
+    setDueDate(getTodayDateString());
     setIsRecurring(false);
     setRecurringType('weekly');
     setInterval(1);
-    setDaysOfWeek([1]);
+    setDaysOfWeek([new Date().getDay()]);
     setHasEndDate(false);
     setEndDate('');
-  };
+  }, []);
+
+  // Ensure fresh state and pre-filled today's date whenever the modal opens
+  useEffect(() => {
+    if (isCreateModalOpen) {
+      resetForm();
+    }
+  }, [isCreateModalOpen, resetForm]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -151,7 +168,7 @@ export function TaskCreateModal() {
             <div className="space-y-1">
               <label className="text-[11px] font-medium text-zinc-400 flex items-center gap-1">
                 <Flag size={12} className="text-zinc-500" />
-                {tTasks('priority')}
+                {tTasks('table.priority')}
               </label>
               <Select value={priority} onValueChange={(val: string) => setPriority(val as Priority)}>
                 <SelectTrigger className="w-full h-9 bg-white/[0.03] border-white/10 text-xs">
@@ -204,10 +221,29 @@ export function TaskCreateModal() {
 
             {/* Due Date */}
             <div className="space-y-1">
-              <label className="text-[11px] font-medium text-zinc-400 flex items-center gap-1">
-                <CalendarIcon size={12} className="text-zinc-500" />
-                {tTasks('dueDate')}
-              </label>
+              <div className="flex items-center justify-between">
+                <label className="text-[11px] font-medium text-zinc-400 flex items-center gap-1">
+                  <CalendarIcon size={12} className="text-zinc-500" />
+                  {tTasks('dueDate')}
+                </label>
+                {dueDate ? (
+                  <button
+                    type="button"
+                    onClick={() => handleDueDateChange('')}
+                    className="text-[10px] text-zinc-500 hover:text-zinc-300 transition-colors"
+                  >
+                    비우기
+                  </button>
+                ) : (
+                  <button
+                    type="button"
+                    onClick={() => handleDueDateChange(getTodayDateString())}
+                    className="text-[10px] text-indigo-400 hover:text-indigo-300 transition-colors"
+                  >
+                    오늘
+                  </button>
+                )}
+              </div>
               <Input
                 type="date"
                 value={dueDate}

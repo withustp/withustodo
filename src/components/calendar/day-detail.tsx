@@ -55,7 +55,7 @@ export function DayDetail({ date, onClose }: DayDetailProps) {
               <div 
                 key={task.id} 
                 onClick={() => {
-                  openDetailPanel(task.id);
+                  openDetailPanel(task.id, format(date, 'yyyy-MM-dd'));
                   onClose();
                 }}
                 className="flex items-center gap-3 p-3 rounded-lg border border-border hover:bg-muted/50 hover:border-primary/30 transition-all cursor-pointer group"

@@ -46,7 +46,14 @@ export type ReminderInterval = '15min' | '30min' | '1hr' | '2hr' | '4hr' | '8hr'
 
 // Recurring
 export type RecurringType = 'daily' | 'weekly' | 'monthly';
-export type RecurringPattern = { type: RecurringType; interval: number; days_of_week?: number[]; day_of_month?: number; end_date?: string; }
+export type RecurringPattern = { 
+  type: RecurringType; 
+  interval: number; 
+  days_of_week?: number[]; 
+  day_of_month?: number; 
+  end_date?: string; 
+  excluded_dates?: string[]; // Array of 'YYYY-MM-DD' dates where this recurrence is suppressed
+}
 
 // Time Entry (Pomodoro)
 export type TimeEntry = { 

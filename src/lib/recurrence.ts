@@ -252,6 +252,12 @@ export function isTaskScheduledOnDate(task: Task, targetDate: Date): boolean {
   }
 
   const pattern = task.recurring_pattern;
+
+  // Suppress recurring projection if this specific date is excluded
+  if (pattern.excluded_dates && pattern.excluded_dates.includes(targetDayStr)) {
+    return false;
+  }
+
   const startDate = task.due_date ? parseISO(task.due_date) : parseISO(task.created_at);
   if (!isValid(startDate)) return false;
 

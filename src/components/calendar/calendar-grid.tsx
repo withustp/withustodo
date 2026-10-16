@@ -109,7 +109,7 @@ export function CalendarGrid({ currentDate, view }: CalendarGridProps) {
                       key={task.id}
                       onClick={(e) => {
                         e.stopPropagation();
-                        openDetailPanel(task.id);
+                        openDetailPanel(task.id, dateStr);
                       }}
                       className={cn(
                         "flex items-center gap-1.5 px-1.5 py-0.5 rounded text-[11px] font-medium truncate transition-colors border cursor-pointer hover:bg-white/15",
